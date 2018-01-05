@@ -7,3 +7,4 @@ Werkzeug==0.12.2
 requests==2.18.2
 psycopg2==2.7.3
 simplejson == 3.11.1
+boto3 == 1.5.8
