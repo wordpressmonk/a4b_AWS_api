@@ -138,24 +138,24 @@ def rooms():
 @app.route("/add_rooms",methods=['POST','GET'])
 def add_rooms():
 	user_a4b=create_client()
-	# response = user_a4b.create_room(
-    # RoomName=request.form['RoomName'],
-    # Description=request.form['Description'],
-    # ProfileArn=request.form['ProfileArn'],
-    # ProviderCalendarId=request.form['ProviderCalendarId'],
-    # ClientRequestToken=request.form['ClientRequestToken'])
+	response = user_a4b.create_room(
+    RoomName=request.form['RoomName'],
+    Description=request.form['Description'],
+    ProfileArn=request.form['ProfileArn'],
+    ProviderCalendarId=request.form['ProviderCalendarId'],
+    ClientRequestToken=request.form['ClientRequestToken'])
 	
-	response = user_a4b.search_profiles(
-    Filters=[
-        {
-            'Key': 'ProfileName',
-            'Values': [
-                'kitchen',
-            ]
-        },
-    ]
-	)
-	#return jsonify(response)
+	# response = user_a4b.search_profiles(
+    # Filters=[
+        # {
+            # 'Key': 'ProfileName',
+            # 'Values': [
+                # 'Hotel A',
+            # ]
+        # },
+    # ]
+	# )
+	# return jsonify(response)
 	return("Rooms Created")
 	
 @app.route("/devices")
