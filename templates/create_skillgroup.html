@@ -1,0 +1,20 @@
+<html>
+	<head>
+		<title>Create User</title>
+	</head>
+	<body>
+		<form class="create_skillgroup" action="{{url_for('add_skill_group')}}" method="POST">
+			
+			<label for="SkillGroupName">SkillGroupName</label>
+			<input style="display:block;" class="textbox" type="textbox" name="SkillGroupName" id="SkillGroupName" required><br/>
+			
+			<label for="Description">Description</label>
+			<input style="display:block;" class="textbox" type="textbox" name="Description" id="Description"><br/>
+		
+			<label for="ClientRequestToken">Id</label>
+			<input style="display:block;" class="textbox" type="textbox" name="ClientRequestToken" id="ClientRequestToken"><br/>
+		
+			<input type="Submit" value="submit"/>
+		</form>
+	</body>
+</html>

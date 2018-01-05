@@ -1,0 +1,58 @@
+<html>
+	<head>
+		<title>Create Room Profile</title>
+	</head>
+	<body>
+		<form class="Create_room_profile" action="{{url_for('add_room_profile')}}" method="POST">
+												
+			<label for="ProfileName ">RoomProfileName</label>
+			<input style="display:block;" class="textbox" type="textbox" name="ProfileName" id="ProfileName" required><br/>
+			
+			<label for="Timezone">Timezone</label>
+			<input style="display:block;" class="textbox" type="textbox" name="Timezone" id="Timezone" required><br/><!-- value="Asia/Kolkata" --> 
+		
+			<label for="Address">Adress</label>
+			<input style="display:block;" class="textbox" type="textbox" name="Address" id="Address" required><br/>  <!-- value="10210 FM-1021, Eagle Pass, KA, IN, 570036" -->
+		
+			<label for="DistanceUnit">Distance Unit</label>
+			<select name="DistanceUnit" style="display:block;">
+				<option value="METRIC">METRIC</option>
+				<option value="IMPERIAL">IMPERIAL</option>
+			</select><br/><br/>
+			
+			<label for="TemperatureUnit">Temperature Unit</label>
+			<select name="TemperatureUnit" style="display:block;">
+				<option value="FAHRENHEIT">FAHRENHEIT</option>
+				<option value="CELSIUS">CELSIUS</option><br/>
+			</select><br/><br/>
+
+			<label for="WakeWord">Wake Word</label>
+			<select name="WakeWord" style="display:block;">
+				<option value="ALEXA">ALEXA</option>
+				<option value="AMAZON">AMAZON</option>
+				<option value="ECHO">ECHO</option>
+				<option value="COMPUTER">COMPUTER</option>
+			</select><br/>
+			
+			<label for="ClientRequestToken">Room Profile ID</label>
+			<input style="display:block;" class="textbox" type="textbox" name="ClientRequestToken" id="ClientRequestToken" required><br/>
+			
+			<label for="SetupModeDisabled">Disable Setup Mode</label>
+			<select name="SetupModeDisabled" style="display:block;">
+				<option value="True">True</option>
+				<option value="False">False</option>
+			</select><br/>
+			
+			<label for="MaxVolumeLimit">Maximum Volume</label>
+			<input style="display:block;" class="textbox" type="Integer" name="MaxVolumeLimit" id="MaxVolumeLimit" required><br/>
+			
+			<label for="PSTNEnabled">Enable Calling</label>
+			<select name="PSTNEnabled" style="display:block;">
+				<option value="True">True</option>
+				<option value="False">False</option>
+			</select><br/><br/>
+			
+			<input type="Submit" value="submit"/>
+		</form>
+	</body>
+</html>

@@ -1,0 +1,28 @@
+<html>
+	<head>
+	
+		<title>Create Organization</title>
+	</head>
+	<body>
+		<form class="add_acc" action = "{{url_for('add_acc')}}" method="POST">
+			
+			<label for="Email">Email</label>
+			<input style="display:block;" type="Email" name="Email" id="Email" required><br/>
+			
+			<label for="AccountName">Account Name</label>
+			<input style="display:block;" type="textbox" name="AccountName" id="AccountName" required><br/>
+			
+			<label for="RoleName">Role Name</label>
+			<input style="display:block;" type="textbox" name="RoleName" id="RoleName"><br/>
+			
+			<!-- <label>Access Billing</label><br/><br/>
+			<select name="IamUserAccessToBilling">
+				<option value="ALLOW">ALLOW</option>
+				<option value="DENY">DENY</option>
+			</select> -->
+		<br/>
+		<input type="submit" value="submit"/><br/>
+		</form>
+	</body>
+	
+</html>

@@ -1,0 +1,17 @@
+<html>
+	<head>
+		<title>Create User</title>
+	</head>
+	<body>
+		<form class="create_user" action="{{url_for('add_new_user')}}" method="POST">
+			
+			<label for="Path">Path(/Hotel_Name/)</label>
+			<input style="display:block;" class="textbox" type="textbox" name="Path" id="Path"><br/>
+			
+			<label for="UserName">UserName</label>
+			<input style="display:block;" class="textbox" type="textbox" name="UserName" id="UserName" required><br/>
+		
+			<input type="Submit" value="submit"/>
+		</form>
+	</body>
+</html>
