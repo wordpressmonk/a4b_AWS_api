@@ -1,0 +1,15 @@
+click==6.7
+Flask==0.12.2
+gunicorn==19.7.1
+itsdangerous>=0.2
+Jinja2==2.9.6
+MarkupSafe==1.0
+Werkzeug==0.12.2
+requests==2.18.2
+psycopg2==2.7.3
+simplejson == 3.11.1
+datetime >= 4.2
+mailchimp3==2.0.15
+facebook >=0
+facebook-sdk==2.0.0
+constantcontact == 0.3.3
