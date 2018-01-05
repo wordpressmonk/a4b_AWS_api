@@ -1,8 +1,6 @@
 from flask import Flask,render_template,request,jsonify
 import os
 import json
-from org_api import *
-from a4b_api import *
 from config import *
 
 client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
