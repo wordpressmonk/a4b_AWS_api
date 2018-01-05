@@ -83,7 +83,7 @@ def add_skill_group():
 	response=client_a4b.create_skill_group(
 	SkillGroupName = request.form['SkillGroupName'],
 	Description = request.form['Description'],
-	ClientRequestToken = request.form['ClientRequestToken']+'-'+keys['aws_access_key_id'])
+	ClientRequestToken = request.form['ClientRequestToken']+'-**********')
 	
 	# response = client_a4b.search_skill_groups(
     # Filters=[
