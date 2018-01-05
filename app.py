@@ -71,8 +71,8 @@ def add_new_user(**kwargs):
 		# delete user
 		# response = client.delete_user(
 		# UserName='arn:aws:iam::512990229200:user/HotelA/rohit')
-	# return username_dict	
-	return jsonify(response)
+	return("User Created")
+	#return jsonify(response)
 	
 @app.route("/skill_group")
 def skill_group():
@@ -95,7 +95,8 @@ def add_skill_group():
         # },
     # ]
 	# )
-	return jsonify(response)
+	#return jsonify(response)
+	return ("Skill Group Added")
 
 @app.route("/user")
 def user():
@@ -127,7 +128,8 @@ def add_room_profile():
     MaxVolumeLimit=int(request.form['MaxVolumeLimit']),
     PSTNEnabled=bool(request.form['PSTNEnabled']))
 	
-	return jsonify(response)
+	#return jsonify(response)
+	return ("Room Profile Added")
 
 @app.route("/rooms")
 def rooms():
@@ -153,7 +155,8 @@ def add_rooms():
         },
     ]
 	)
-	return jsonify(response)
+	#return jsonify(response)
+	return("Rooms Created")
 	
 @app.route("/devices")
 def devices():
