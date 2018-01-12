@@ -58,6 +58,10 @@ def add_new_user():
 	
 #return("User Created")
 	return jsonify(response)
+@app.route("/a4b/api/v1.0/list_users",methods=['GET'])
+def list_users():
+	response=client_iam.list_users()
+	return jsonify(response)
 
 @app.route("/a4b/api/v1.0/add_skill_group",methods=['POST'])
 def add_skill_group():
