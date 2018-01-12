@@ -21,7 +21,8 @@ def admin():
 def newuser():
 	return render_template('create_user.html')
 
-@app.route("/add_new_user",methods = ['POST', 'GET'])
+#@app.route("/add_new_user",methods = ['POST', 'GET'])
+@app.route("/a4b/api/v1.0/add_new_user",methods = ['POST'])
 def add_new_user(**kwargs):
 	if request.method == 'POST':
 		#Create User
@@ -95,8 +96,10 @@ def add_skill_group():
         # },
     # ]
 	# )
-	#return jsonify(response)
-	return ("Skill Group Added")
+	print(SkillGroupName)#,Description,ClientRequestToken)
+	
+	return jsonify(response)
+	#return ("Skill Group Added")
 
 @app.route("/user")
 def user():

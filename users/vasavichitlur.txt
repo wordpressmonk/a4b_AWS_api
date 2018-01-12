@@ -1,1 +1,0 @@
-{'aws_access_key_id': 'AKIAJKK4YEMACDUBKNMA', 'aws_secret_access_key': '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', 'arn': 'arn:aws:iam::512990229200:user/HotelA/vasavichitlur'}
