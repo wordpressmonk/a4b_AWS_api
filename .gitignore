@@ -3,6 +3,7 @@
 
 # pycache dir
 /__pycache__
+/skill
 
 
 a4b_api.py
