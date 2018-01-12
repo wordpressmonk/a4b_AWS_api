@@ -1,5 +1,4 @@
 # author - Vasavi Chitlur
-#manage dish and quantity in session
 from __future__ import print_function
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
@@ -80,24 +79,51 @@ def fetch_menu():
 	response = table.scan()
 	return response
 	
+def fetch_time(dish):
+	response = table.get_item(
+	Key={
+		'menu_item':dish.lower()
+	})
+	
+	if 'Item' in responsekeys:
+		time = response['Item']['time']
+		return time
+	else:
+		return ("Item not available")
 #--------------------------- other functions-----------------
-def PlaceOrder(intent):
-	attributes={}
-	if ('value' in intent_request['intent']['slots']['dish_order']):
-			attributes("dish") = intent_request['intent']['slots']['dish_order']['value']
+def PlaceOrder(attributes):
+	"""
+	Return a suitable greeting...
+	"""
+	dish=attributes['dish']
+	quantity=attributes['quantity']
+	attributes.clear()
+	time = fetch_time(dish)
+	
+	if not(time == 'Item not available'):
+		speech_output='your order of '+quantity+' '+dish+' will arrive in '+time+' minutes'
+		speech_content='your order of '+quantity+' '+dish+' will arrive in '+time+' minutes'
+		should_end_session=True
+		return build_response(attributes, build_speechlet_response(speech_output,speech_content, None, should_end_session))
 	else:
-		return RequestMenu()
-	if len(intent_request['intent']['slots']['quantity_order']) > 1:
-		dish=attributes("quantity")=intent_request['intent']['slots']['quantity_order']['value']
-		
-	else:
-		return RequestQuantity()
-	speech_output='your order of '+quantity+' '+order+' will arrive shortly'
-	speech_content='your order of '+quantity+' '+order+' will arrive shortly'
+		speech_output='Item not on the menu'
+		speech_content='Item not on the menu'
+		should_end_session=True
+		return build_response(attributes, build_speechlet_response(speech_output,speech_content, None, should_end_session))
+	
+def PlaceOrderFull(dish,quantity):
+	"""
+
+	Return a suitable greeting...
+	"""
+	time=fetch_time(dish)
+	speech_output='your order of '+quantity+' '+dish+' will arrive in '+time+' minutes'
+	speech_content='your order of '+quantity+' '+dish+' will arrive in '+time+' minutes'
 	should_end_session=True
 	return build_response({}, build_speechlet_response(speech_output,speech_content, None, should_end_session))
 
-def RequestQuantity():
+
+def RequestQuantity(attributes):
 	"""
 	Return a suitable greeting...
 	"""
@@ -105,9 +131,9 @@ def RequestQuantity():
 	speech_content='how much do you need?'
 	should_end_session=False
 	repromt_text="Please specify quantity"
-	return build_response({}, build_speechlet_response(speech_output,speech_content, repromt_text, should_end_session))
+	return build_response(attributes, build_speechlet_response(speech_output,speech_content, repromt_text, should_end_session))
 
-def RequestMenu():
+def RequestMenu(attributes):
 	"""
 	Return a suitable greeting...
 	"""
@@ -115,10 +141,38 @@ def RequestMenu():
 	speech_content='what do you like to order'
 	should_end_session=True
 	reprompt_text='what do you like to order'
-	return build_response({}, build_speechlet_response(speech_output,speech_content, reprompt_text, should_end_session))
+	return build_response(attributes, build_speechlet_response(speech_output,speech_content, reprompt_text, should_end_session))
 
+def VerifyOrder(slots,session):
+	attributes=session['attributes']
+	if('value' in slots['dish_order'] and 'value' in slots['quantity_order']):
+		
+		return PlaceOrderFull(slots['dish_order']['value'],slots['quantity_order']['value'])
+	elif('value' in slots['dish_order'] and 'value' not in slots['quantity_order']):
+		attributes['dish'] = slots['dish_order']['value']
+		if 'quantity' not in attributes.keys():
+			return RequestQuantity(attributes)
+		else:
+			#dish=attributes['dish']
+			#quantity=attributes['quantity']
+			#return PlaceOrder(dish,quantity)
+			return PlaceOrder(attributes)
+	elif('value' in slots['quantity_order'] and 'value' not in slots['dish_order']):
+		attributes['quantity'] = slots['quantity_order']['value']
+		if 'dish' not in attributes.keys():
+			return RequestMenu(attributes)
+		else:
+			#dish=attributes['dish']
+			#quantity=attributes['quantity']
+			#return PlaceOrder(dish,quantity)
+			return PlaceOrder(attributes)
+	else:
+		#dish=attributes['dish']
+		#quantity=attributes['quantity']
+		#return PlaceOrder(dish,quantity)
+		return PlaceOrder(attributes)
 
-
+		
 # --------------- Events ------------------
 def on_session_started(session_started_request, session):
     """ Called when the session starts """
@@ -130,6 +184,7 @@ def on_launch(launch_request, session):
           ", sessionId=" + session['sessionId'])
     # Dispatch to your skill's launch
     return on_launch_response()
+	
 def on_intent(intent_request, session):
 	""" Called when the user specifies an intent for this skill """
 	print("on_intent requestId=" + intent_request['requestId'] +
@@ -138,7 +193,8 @@ def on_intent(intent_request, session):
 	intent_name = intent_request['intent']['name']
 	# Dispatch to your skill's intent handlers
 	if intent_name == "PlaceOrderIntent":
-		return PlaceOrder(intent)
+		return VerifyOrder(intent['slots'],session)
+
 def on_session_ended(session_ended_request, session):
 	""" Called when the user ends the session. Is not called when the skill returns should_end_session=true """
 	print("on_session_ended requestId=" + session_ended_request['requestId'] +
