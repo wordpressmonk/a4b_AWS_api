@@ -54,33 +54,36 @@ def add_new_user():
 	
 @app.route("/a4b/api/v1.0/delete_users",methods=['POST'])
 def delete_users():
-	UserNameList=request.json['UserName']
-	for OneUserName in UserNameList:
-		response_table = table.get_item(
-		Key={
-			'UserName':OneUserName
-		})
-		
-		#delete access keys
-		response_access = client_iam.delete_access_key(
-		UserName=OneUserName,
-		AccessKeyId=response_table['Item']['aws_access_key_id'])
-		
-		# detach user policy
-		response_policy = client_iam.detach_user_policy(
-		UserName=OneUserName,
-		PolicyArn='arn:aws:iam::aws:policy/AlexaForBusinessFullAccess')
+    if 'UserName' in request.json:
+        try:
+            UserNameList=request.json['UserName']
+            for OneUserName in UserNameList:
+                response_table = table.get_item(
+                Key={
+                    'UserName':OneUserName
+                })
+                
+                #delete access keys
+                response_access = client_iam.delete_access_key(
+                UserName=OneUserName,
+                AccessKeyId=response_table['Item']['aws_access_key_id'])
+                
+                # detach user policy
+                response_policy = client_iam.detach_user_policy(
+                UserName=OneUserName,
+                PolicyArn='arn:aws:iam::aws:policy/AlexaForBusinessFullAccess')
 
-		#to delete user first delete access keys and policies attached to that user and then delete user
-		response = client_iam.delete_user(
-		UserName=OneUserName)
-		
-		#delete entry in dynamodb
-		table.delete_item(
-		Key={
-				'UserName':OneUserName	
-		})
-
+                #to delete user first delete access keys and policies attached to that user and then delete user
+                response = client_iam.delete_user(
+                UserName=OneUserName)
+                
+                #delete entry in dynamodb
+                table.delete_item(
+                Key={
+                        'UserName':OneUserName	
+                })
+            except Exception as e:
+                pass
 	return list_users()
 
 @app.route("/a4b/api/v1.0/list_users",methods=['GET'])
