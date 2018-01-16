@@ -74,6 +74,11 @@ def add_new_user(**kwargs):
 		# UserName='arn:aws:iam::512990229200:user/HotelA/rohit')
 	return("User Created")
 	#return jsonify(response)
+
+@app.route("/a4b/api/v1.0/list_users",methods=['GET'])
+def list_users():
+	response=client_iam.list_users()
+	return jsonify(response)
 	
 @app.route("/skill_group")
 def skill_group():
