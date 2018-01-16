@@ -2,67 +2,100 @@ from flask import Flask,render_template,request,jsonify
 import os,json,boto3
 from config import *
 
-client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
-client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name="us-east-1")
+client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
+#client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
+client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
+table=client_dynamodb.Table('IamUser')
 
 app=Flask(__name__)
 
+def create_a4b_client():
+	UserName='vasaviCG'
+	file = open('./users/'+UserName+'.json', 'r') 
+	keys=json.loads(file.read())
+	user_a4b=boto3.client('alexaforbusiness',aws_access_key_id=keys['aws_access_key_id'],aws_secret_access_key=keys['aws_secret_access_key'],region_name="us-east-1")
+	return (user_a4b)
+
+	
 @app.route("/")
 def main():
 	return render_template('login.html')
-
-@app.route("/admin")
-def admin():	
-	return render_template('choices_admin.html')
 
 @app.route("/a4b/api/v1.0/add_new_user",methods = ['POST'])
 def add_new_user():
 	#Create User
 	response = client_iam.create_user(
-	Path=request.json['Path'],
+	Path='/'+request.json['Path']+'/',
 	UserName=request.json['UserName'])
 
-	#Attach policy to user
+	#Attach only A4B policy to user 
 	response_policy = client_iam.attach_user_policy(
 	UserName=response['User']['UserName'],#see list IAM users to see all available users
-	PolicyArn='arn:aws:iam::aws:policy/AdministratorAccess')#see get policy arn to list all available policies
+	PolicyArn='arn:aws:iam::aws:policy/AlexaForBusinessFullAccess')#see get policy arn to list all available policies
 	
 	#Create access Key
 	response_access = client_iam.create_access_key(
 	UserName=response['User']['UserName'])
 	
-	#store access keys in a file for user created
-	username_dict={}
-	username_dict['aws_access_key_id']=response_access['AccessKey']['AccessKeyId']
-	username_dict['aws_secret_access_key']=response_access['AccessKey']['SecretAccessKey']
-	username_dict['arn']=response['User']['Arn']
 	
-	file=open("./users/"+response_access['AccessKey']['UserName']+".json","w")
-	file.write(json.dumps(username_dict))
-	file.close()
+	#store access keys in a database for user created
+	response_table=table.put_item(
+	Item={
+		'UserName':response['User']['UserName'],
+		'aws_access_key_id':response_access['AccessKey']['AccessKeyId'],
+		'aws_secret_access_key':response_access['AccessKey']['SecretAccessKey'],
+		'userarn':response['User']['Arn']
+	})
+	#return jsonify(response)
+	return list_users()
 	
-	#delete access keys
-	# response = client_iam.delete_access_key(
-	# UserName='rohit',
-	# AccessKeyId='AKIAJFZYZXK3LNAPQYDA')
-	
-	# detach user policy
-	# response = client_iam.detach_user_policy(
-	# UserName='rohit',
-	# PolicyArn='arn:aws:iam::aws:policy/AdministratorAccess')
+@app.route("/a4b/api/v1.0/delete_users",methods=['POST'])
+def delete_users():
+	UserNameList=request.json['UserName']
+	for OneUserName in UserNameList:
+		response_table = table.get_item(
+		Key={
+			'UserName':OneUserName
+		})
+		
+		#delete access keys
+		response_access = client_iam.delete_access_key(
+		UserName=OneUserName,
+		AccessKeyId=response_table['Item']['aws_access_key_id'])
+		
+		# detach user policy
+		response_policy = client_iam.detach_user_policy(
+		UserName=OneUserName,
+		PolicyArn='arn:aws:iam::aws:policy/AlexaForBusinessFullAccess')
 
-	# to delete user first delete access keys and policies attached to that user and then delete user
-	# delete user
-	# response = client.delete_user(
-	# UserName='arn:aws:iam::512990229200:user/HotelA/rohit')
-	
-#return("User Created")
-	return jsonify(response)
+		#to delete user first delete access keys and policies attached to that user and then delete user
+		response = client_iam.delete_user(
+		UserName=OneUserName)
+		
+		#delete entry in dynamodb
+		table.delete_item(
+		Key={
+				'UserName':OneUserName	
+		})
+
+	return list_users()
 @app.route("/a4b/api/v1.0/list_users",methods=['GET'])
 def list_users():
 	response=client_iam.list_users()
 	return jsonify(response)
+	
+@app.route("/a4b/api/v1.0/update_users",methods=['POST'])
+def update_users():
+	response=client_iam.update_user(
+	UserName = request.json['UserName'],
+	NewPath = request.json['NewPath'],
+	NewUserName = request.json['NewUserName'])
+	
+	return jsonify(response)
 
+	
+	
+	
 @app.route("/a4b/api/v1.0/add_skill_group",methods=['POST'])
 def add_skill_group():
 	response=client_a4b.create_skill_group(
@@ -72,13 +105,6 @@ def add_skill_group():
 	#print(SkillGroupName)#,Description,ClientRequestToken)	
 	return jsonify(response)
 	#return ("Skill Group Added")
-
-def create_client():
-	UserName='vasaviCG'
-	file = open('./users/'+UserName+'.json', 'r') 
-	keys=json.loads(file.read())
-	user_a4b=boto3.client('alexaforbusiness',aws_access_key_id=keys['aws_access_key_id'],aws_secret_access_key=keys['aws_secret_access_key'],region_name="us-east-1")
-	return (user_a4b)
 	
 @app.route("/a4b/api/v1.0/add_room_profile", methods=['POST'])
 def add_room_profile():
@@ -119,7 +145,25 @@ def add_rooms():
 	# )
 	return jsonify(response)
 	#return("Rooms Created")
-			
+@app.route("/a4b/api/v1.0/list_rooms",methods=['GET'])
+def list_rooms():	
+	user_a4b=create_client()
+	response = user_a4b.search_rooms(
+	)
+	return jsonify(response)
+@app.route("/a4b/api/v1.0/update_rooms",methods=['POST'])
+def update_rooms():
+	user_a4b=create_client()
+	response= user_a4b.update_room(
+    #RoomArn=request.json['RoomArn'],
+    RoomName=request.json['RoomName']
+    #Description=request.json['Description'],
+    #ProviderCalendarId=request.json['ProviderCalendarId'],
+    #ProfileArn=request.json['ProfileArn'])
+	)
+	return jsonfiy(response)
+
+
 if __name__ == "__main__":
 	#app.run(debug=True)
     app.debug = True

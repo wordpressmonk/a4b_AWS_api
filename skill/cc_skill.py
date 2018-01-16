@@ -85,7 +85,7 @@ def fetch_time(dish):
 		'menu_item':dish.lower()
 	})
 	
-	if 'Item' in responsekeys:
+	if 'Item' in response.keys():
 		time = response['Item']['time']
 		return time
 	else:
@@ -117,10 +117,16 @@ def PlaceOrderFull(dish,quantity):
 	Return a suitable greeting...
 	"""
 	time=fetch_time(dish)
-	speech_output='your order of '+quantity+' '+dish+' will arrive in '+time+' minutes'
-	speech_content='your order of '+quantity+' '+dish+' will arrive in '+time+' minutes'
-	should_end_session=True
-	return build_response({}, build_speechlet_response(speech_output,speech_content, None, should_end_session))
+	if not(time == 'Item not available'):
+		speech_output='your order of '+quantity+' '+dish+' will arrive in '+time+' minutes'
+		speech_content='your order of '+quantity+' '+dish+' will arrive in '+time+' minutes'
+		should_end_session=True
+		return build_response({}, build_speechlet_response(speech_output,speech_content, None, should_end_session))
+	else:
+		speech_output='Item not on the menu'
+		speech_content='Item not on the menu'
+		should_end_session=True
+		return build_response({}, build_speechlet_response(speech_output,speech_content, None, should_end_session))
 
 
 def RequestQuantity(attributes):
@@ -189,6 +195,11 @@ def on_intent(intent_request, session):
 	""" Called when the user specifies an intent for this skill """
 	print("on_intent requestId=" + intent_request['requestId'] +
 			", sessionId=" + session['sessionId'])
+	if 'attributes' not in session.keys():
+		session['attributes'] = {}
+		session_attributes = session['attributes']
+	else:    
+		session_attributes = session['attributes']
 	intent = intent_request['intent']
 	intent_name = intent_request['intent']['name']
 	# Dispatch to your skill's intent handlers
