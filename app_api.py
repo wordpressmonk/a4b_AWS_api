@@ -3,24 +3,27 @@ import os,json,boto3
 from config import *
 
 client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
-#client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
+client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
 client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
 table=client_dynamodb.Table('IamUser')
 
 app=Flask(__name__)
 
-def create_a4b_client():
-	UserName='vasaviCG'
-	file = open('./users/'+UserName+'.json', 'r') 
-	keys=json.loads(file.read())
-	user_a4b=boto3.client('alexaforbusiness',aws_access_key_id=keys['aws_access_key_id'],aws_secret_access_key=keys['aws_secret_access_key'],region_name="us-east-1")
-	return (user_a4b)
+# def create_a4b_client():
+	# UserName='vasaviCG'
+	# file = open('./users/'+UserName+'.json', 'r') 
+	# keys=json.loads(file.read())
+	# user_a4b=boto3.client('alexaforbusiness',aws_access_key_id=keys['aws_access_key_id'],aws_secret_access_key=keys['aws_secret_access_key'],region_name="us-east-1")
+	# return (user_a4b)
 
 	
 @app.route("/")
 def main():
 	return render_template('login.html')
 
+#
+#CRUD for IAM Users
+#
 @app.route("/a4b/api/v1.0/add_new_user",methods = ['POST'])
 def add_new_user():
 	#Create User
@@ -79,6 +82,7 @@ def delete_users():
 		})
 
 	return list_users()
+
 @app.route("/a4b/api/v1.0/list_users",methods=['GET'])
 def list_users():
 	response=client_iam.list_users()
@@ -93,8 +97,9 @@ def update_users():
 	
 	return jsonify(response)
 
-	
-	
+#
+#CRUD for Skill group	
+#
 	
 @app.route("/a4b/api/v1.0/add_skill_group",methods=['POST'])
 def add_skill_group():
@@ -104,12 +109,15 @@ def add_skill_group():
 	ClientRequestToken = request.json['ClientRequestToken'])
 	#print(SkillGroupName)#,Description,ClientRequestToken)	
 	return jsonify(response)
-	#return ("Skill Group Added")
+	
+#
+#CRUD for roomprofile
+#
 	
 @app.route("/a4b/api/v1.0/add_room_profile", methods=['POST'])
 def add_room_profile():
-	user_a4b=create_client()#when login page is provided pass username from login page
-	response = user_a4b.create_profile(
+	#user_a4b=create_client()#when login page is provided pass username from login page
+	response = client_a4b.create_profile(
 	ProfileName=request.json['ProfileName'],
 	Timezone=request.json['Timezone'],
 	Address=request.json['Address'],
@@ -123,17 +131,22 @@ def add_room_profile():
 	return jsonify(response)
 	#return ("Room Profile Added")
 	
+@app.route("/a4b/api/v1.0/list_room_profile", methods=['POST'])
+def list_room_profile():
+	response = client_a4b.create_profile()
+	return jsonify(response)
+#
+#CRUD for rooms
+#
+	
 @app.route("/a4b/api/v1.0/add_rooms",methods=['POST'])
 def add_rooms():
-	user_a4b=create_client()
-	response = user_a4b.create_room(
+	#user_a4b=create_client()
+	response = client_a4b.create_room(
 	RoomName=request.json['RoomName'],
-	Description=request.json['Description'],
-	ProfileArn=request.json['ProfileArn'],
-	#ProviderCalendarId=request.json['ProviderCalendarId'],
-	ClientRequestToken=request.json['ClientRequestToken'])
+	ProfileArn=request.json['ProfileArn'])
 	
-	# response = user_a4b.search_profiles(
+	# response = client_a4b.search_profiles(
     # Filters=[
         # {
             # 'Key': 'ProfileName',
@@ -147,14 +160,14 @@ def add_rooms():
 	#return("Rooms Created")
 @app.route("/a4b/api/v1.0/list_rooms",methods=['GET'])
 def list_rooms():	
-	user_a4b=create_client()
-	response = user_a4b.search_rooms(
+	#client_a4b=create_client()
+	response = client_a4b.search_rooms(
 	)
 	return jsonify(response)
 @app.route("/a4b/api/v1.0/update_rooms",methods=['POST'])
 def update_rooms():
-	user_a4b=create_client()
-	response= user_a4b.update_room(
+	#client_a4b=create_client()
+	response= client_a4b.update_room(
     #RoomArn=request.json['RoomArn'],
     RoomName=request.json['RoomName']
     #Description=request.json['Description'],
