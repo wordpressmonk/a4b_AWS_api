@@ -82,8 +82,8 @@ def delete_users():
                 Key={
                         'UserName':OneUserName	
                 })
-            except Exception as e:
-                pass
+        except Exception as e:
+            pass
 	return list_users()
 
 @app.route("/a4b/api/v1.0/list_users",methods=['GET'])
