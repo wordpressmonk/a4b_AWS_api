@@ -84,7 +84,7 @@ def delete_users():
                 })
         except Exception as e:
             pass
-	return list_users()
+    return list_users()
 
 @app.route("/a4b/api/v1.0/list_users",methods=['GET'])
 def list_users():
