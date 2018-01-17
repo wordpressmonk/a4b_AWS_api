@@ -225,12 +225,14 @@ def update_rooms():
 @app.route("/a4b/api/v1.0/delete_rooms",methods=['POST'])
 def delete_rooms():
 	#get roomarn from roomname
-	RoomName=request.json['RoomName']
-	RoomArn=get_room_arn(RoomName)
-	
-	response = client_a4b.delete_room(
-    RoomArn=RoomArn)
-	
+	RoomNameList=request.json['RoomName']
+	for OneRoomName in RoomNameList:
+		RoomName=OneRoomName
+		RoomArn=get_room_arn(RoomName)
+		
+		response = client_a4b.delete_room(
+		RoomArn=RoomArn)
+		
 	return list_rooms()
 	
 	
