@@ -1,6 +1,8 @@
 from flask import Flask,render_template,request,jsonify
 import os,json,boto3
 from config import *
+from functools import wraps
+from botocore.exceptions import ClientError
 
 client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
 client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
@@ -15,6 +17,18 @@ app=Flask(__name__)
 	# keys=json.loads(file.read())
 	# user_a4b=boto3.client('alexaforbusiness',aws_access_key_id=keys['aws_access_key_id'],aws_secret_access_key=keys['aws_secret_access_key'],region_name="us-east-1")
 	# return (user_a4b)
+def handle_stripe(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except (TypeError,IndexError,KeyError) as e:
+            return ("Some value in the operation doesn't exist")
+        except ClientError  as e:
+            #return jsonify(e)
+            return e.response['Error']['Message']
+
+    return decorated
 
 	
 @app.route("/")
@@ -25,6 +39,7 @@ def main():
 #CRUD for IAM Users
 #
 @app.route("/a4b/api/v1.0/add_new_user",methods = ['POST'])
+@handle_stripe
 def add_new_user():
     print(request.json)
     #Create User
@@ -54,45 +69,44 @@ def add_new_user():
     return list_users()
 	
 @app.route("/a4b/api/v1.0/delete_users",methods=['POST'])
+@handle_stripe
 def delete_users():
-    if 'UserName' in request.json:
-        try:
-            UserNameList=request.json['UserName']
-            for OneUserName in UserNameList:
-                response_table = table.get_item(
-                Key={
-                    'UserName':OneUserName
-                })
-                
-                #delete access keys
-                response_access = client_iam.delete_access_key(
-                UserName=OneUserName,
-                AccessKeyId=response_table['Item']['aws_access_key_id'])
-                
-                # detach user policy
-                response_policy = client_iam.detach_user_policy(
-                UserName=OneUserName,
-                PolicyArn='arn:aws:iam::aws:policy/AlexaForBusinessFullAccess')
+	UserNameList=request.json['UserName']
+	for OneUserName in UserNameList:
+		response_table = table.get_item(
+		Key={
+			'UserName':OneUserName
+		})
+		
+		#delete access keys
+		response_access = client_iam.delete_access_key(
+		UserName=OneUserName,
+		AccessKeyId=response_table['Item']['aws_access_key_id'])
+		
+		# detach user policy
+		response_policy = client_iam.detach_user_policy(
+		UserName=OneUserName,
+		PolicyArn='arn:aws:iam::aws:policy/AlexaForBusinessFullAccess')
 
-                #to delete user first delete access keys and policies attached to that user and then delete user
-                response = client_iam.delete_user(
-                UserName=OneUserName)
-                
-                #delete entry in dynamodb
-                table.delete_item(
-                Key={
-                        'UserName':OneUserName	
-                })
-        except Exception as e:
-            pass
-    return list_users()
+		#to delete user first delete access keys and policies attached to that user and then delete user
+		response = client_iam.delete_user(
+		UserName=OneUserName)
+		
+		#delete entry in dynamodb
+		table.delete_item(
+		Key={
+				'UserName':OneUserName	
+		})
+	return list_users()
 
 @app.route("/a4b/api/v1.0/list_users",methods=['GET'])
+@handle_stripe
 def list_users():
 	response=client_iam.list_users()
 	return jsonify(response)
 	
 @app.route("/a4b/api/v1.0/update_users",methods=['POST'])
+@handle_stripe
 def update_users():
 	response=client_iam.update_user(
 	UserName = request.json['UserName'],
@@ -106,6 +120,7 @@ def update_users():
 #
 	
 @app.route("/a4b/api/v1.0/add_skill_group",methods=['POST'])
+@handle_stripe
 def add_skill_group():
 	response=client_a4b.create_skill_group(
 	SkillGroupName = request.json['SkillGroupName'],
@@ -119,6 +134,7 @@ def add_skill_group():
 #
 	
 @app.route("/a4b/api/v1.0/add_room_profile", methods=['POST'])
+@handle_stripe
 def add_room_profile():
 	#user_a4b=create_client()#when login page is provided pass username from login page
 	response = client_a4b.create_profile(
@@ -128,14 +144,16 @@ def add_room_profile():
 	DistanceUnit=request.json['DistanceUnit'],
 	TemperatureUnit=request.json['TemperatureUnit'],
 	WakeWord=request.json['WakeWord'],
-	ClientRequestToken=request.json['ClientRequestToken'],
+	#ClientRequestToken=request.json['ClientRequestToken'],
 	SetupModeDisabled=bool(request.json['SetupModeDisabled']),
 	MaxVolumeLimit=int(request.json['MaxVolumeLimit']),
 	PSTNEnabled=bool(request.json['PSTNEnabled']))
-	return jsonify(response)
+	#return jsonify(response)
 	#return ("Room Profile Added")
+	return list_room_profile()
 	
 @app.route("/a4b/api/v1.0/list_room_profile", methods=['GET'])
+@handle_stripe
 def list_room_profile():
 	response = client_a4b.search_profiles()
 	profiles=response['Profiles']
@@ -143,8 +161,10 @@ def list_room_profile():
 	for profile in profiles:
 		ProfileNameList.append(profile['ProfileName'])
 	return jsonify(ProfileNameList)
+	#return jsonify(response)
 
 def get_profile_arn(ProfileName):
+	
 	response_parn= client_a4b.search_profiles(
     Filters=[
         {
@@ -152,31 +172,56 @@ def get_profile_arn(ProfileName):
 			'Values':[ProfileName]
         }
 			])
+	profiles=response_parn['Profiles']
+	ProfileNameList=[]
+	
 	return response_parn['Profiles'][0]['ProfileArn']
 	
 @app.route("/a4b/api/v1.0/update_room_profile", methods=['POST'])	
-# def update_room_profile():
-	# ProfileName=request.json['ProfileName']
-	# ProfileArn=get_profile_arn(ProfileName)
-	
-	# # response = client_a4b.update_profile(
-    # # ProfileArn=response_parn['Profiles'][0]['ProfileArn'],
-    # # ProfileName=request.json['ProfileName'])
-	# return jsonify(response_parn)
-
-@app.route("/a4b/api/v1.0/delete_room_profile", methods=['POST'])	
-def delete_room_profile():
+def update_room_profile():
 	ProfileName=request.json['ProfileName']
 	ProfileArn=get_profile_arn(ProfileName)
 	
-	response = client.delete_profile(
+	response = client_a4b.update_profile(
+    ProfileArn=ProfileArn,
+	Timezone=request.json['Timezone'],
+	Address=request.json['Address'],
+	DistanceUnit=request.json['DistanceUnit'],
+	TemperatureUnit=request.json['TemperatureUnit'],
+	WakeWord=request.json['WakeWord'],
+	#ClientRequestToken=request.json['ClientRequestToken'],
+	SetupModeDisabled=bool(request.json['SetupModeDisabled']),
+	MaxVolumeLimit=int(request.json['MaxVolumeLimit']),
+	PSTNEnabled=bool(request.json['PSTNEnabled']))
+    
+	return jsonify(response)
+
+@app.route("/a4b/api/v1.0/delete_room_profile", methods=['POST'])
+@handle_stripe
+def delete_room_profile():
+	ProfileNameList=request.json['ProfileName']
+	for OneProfileName in ProfileNameList:
+		ProfileName=OneProfileName
+		ProfileArn=get_profile_arn(ProfileName)
+		
+		response = client_a4b.delete_profile(
 		ProfileArn=ProfileArn
 	)
+		
+	# return list_rooms()
+	# ProfileName=request.json['ProfileName']
+	# ProfileArn=get_profile_arn(ProfileName)
+	
+	# response = client_a4b.delete_profile(
+		# ProfileArn=ProfileArn
+	# )
+	return list_room_profile()
 #
 #CRUD for rooms
 #
 	
 @app.route("/a4b/api/v1.0/add_rooms",methods=['POST'])
+@handle_stripe
 def add_rooms():
 	#user_a4b=create_client()
 	#get profile arn from profile name
@@ -202,6 +247,7 @@ def get_room_arn(RoomName):
 	
 		
 @app.route("/a4b/api/v1.0/update_rooms",methods=['POST'])
+@handle_stripe
 def update_rooms():
 	#client_a4b=create_client()
 	
@@ -221,9 +267,10 @@ def update_rooms():
     #ProviderCalendarId=request.json['ProviderCalendarId'],
     ProfileArn=ProfileArn)
 	
-	return jsonfiy(response)
+	return jsonify(response)
 	
 @app.route("/a4b/api/v1.0/delete_rooms",methods=['POST'])
+@handle_stripe
 def delete_rooms():
 	#get roomarn from roomname
 	RoomNameList=request.json['RoomName']
@@ -238,6 +285,7 @@ def delete_rooms():
 	
 	
 @app.route("/a4b/api/v1.0/list_rooms",methods=['GET'])
+@handle_stripe
 def list_rooms():	
 	#client_a4b=create_client()
 	response = client_a4b.search_rooms(
