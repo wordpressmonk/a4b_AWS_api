@@ -242,10 +242,18 @@ def list_rooms():
 	response = client_a4b.search_rooms(
 	)
 	rooms=response['Rooms']
-	RoomNameList=[]
+	List_room_info=[]
+	# RoomNameList=[]
+	# RoomProfileList=[]
 	for room in rooms:
-		RoomNameList.append(room['RoomName'])
-	return jsonify(RoomNameList)
+		Roomdict={}
+		Roomdict['RoomName']=room['RoomName']
+		Roomdict['ProfileName']=room['ProfileName']
+		List_room_info.append(Roomdict)
+		#RoomNameList.append(room['RoomName'])
+		#RoomProfileList.append(room['ProfileName'])
+	#List_room_info={"RoomNames":RoomNameList,"ProfileName":RoomProfileList}
+	return jsonify(List_room_info)
 
 	
 if __name__ == "__main__":
