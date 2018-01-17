@@ -182,7 +182,16 @@ def update_room_profile():
 	ProfileArn=get_profile_arn(ProfileName)
 	
 	response = client_a4b.update_profile(
-    ProfileArn=ProfileArn)
+    ProfileArn=ProfileArn,
+	Timezone=request.json['Timezone'],
+	Address=request.json['Address'],
+	DistanceUnit=request.json['DistanceUnit'],
+	TemperatureUnit=request.json['TemperatureUnit'],
+	WakeWord=request.json['WakeWord'],
+	#ClientRequestToken=request.json['ClientRequestToken'],
+	SetupModeDisabled=bool(request.json['SetupModeDisabled']),
+	MaxVolumeLimit=int(request.json['MaxVolumeLimit']),
+	PSTNEnabled=bool(request.json['PSTNEnabled']))
     
 	return jsonify(response)
 
@@ -257,7 +266,7 @@ def update_rooms():
     #ProviderCalendarId=request.json['ProviderCalendarId'],
     ProfileArn=ProfileArn)
 	
-	return jsonfiy(response)
+	return jsonify(response)
 	
 @app.route("/a4b/api/v1.0/delete_rooms",methods=['POST'])
 @handle_stripe
