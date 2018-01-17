@@ -131,10 +131,43 @@ def add_room_profile():
 	return jsonify(response)
 	#return ("Room Profile Added")
 	
-@app.route("/a4b/api/v1.0/list_room_profile", methods=['POST'])
+@app.route("/a4b/api/v1.0/list_room_profile", methods=['GET'])
 def list_room_profile():
-	response = client_a4b.create_profile()
-	return jsonify(response)
+	response = client_a4b.search_profiles()
+	profiles=response['Profiles']
+	ProfileNameList=[]
+	for profile in profiles:
+		ProfileNameList.append(profile['ProfileName'])
+	return jsonify(ProfileNameList)
+
+def get_profile_arn(ProfileName):
+	response_parn= client_a4b.search_profiles(
+    Filters=[
+        {
+            'Key':'ProfileName', 
+			'Values':[ProfileName]
+        }
+			])
+	return response_parn['Profiles'][0]['ProfileArn']
+	
+@app.route("/a4b/api/v1.0/update_room_profile", methods=['POST'])	
+# def update_room_profile():
+	# ProfileName=request.json['ProfileName']
+	# ProfileArn=get_profile_arn(ProfileName)
+	
+	# # response = client_a4b.update_profile(
+    # # ProfileArn=response_parn['Profiles'][0]['ProfileArn'],
+    # # ProfileName=request.json['ProfileName'])
+	# return jsonify(response_parn)
+
+@app.route("/a4b/api/v1.0/delete_room_profile", methods=['POST'])	
+def delete_room_profile():
+	ProfileName=request.json['ProfileName']
+	ProfileArn=get_profile_arn(ProfileName)
+	
+	response = client.delete_profile(
+		ProfileArn=ProfileArn
+	)
 #
 #CRUD for rooms
 #
@@ -142,41 +175,74 @@ def list_room_profile():
 @app.route("/a4b/api/v1.0/add_rooms",methods=['POST'])
 def add_rooms():
 	#user_a4b=create_client()
+	#get profile arn from profile name
+	
+	ProfileName=request.json['ProfileName']
+	#ProfileArn=get_profile_arn(ProfileName)
+	
 	response = client_a4b.create_room(
 	RoomName=request.json['RoomName'],
-	ProfileArn=request.json['ProfileArn'])
+	ProfileArn=get_profile_arn(ProfileName))
+	return list_rooms()
 	
-	# response = client_a4b.search_profiles(
-    # Filters=[
-        # {
-            # 'Key': 'ProfileName',
-            # 'Values': [
-                # 'Hotel A',
-            # ]
-        # },
-    # ]
-	# )
-	return jsonify(response)
-	#return("Rooms Created")
+
+def get_room_arn(RoomName):
+	response_parn= client_a4b.search_rooms(
+    Filters=[
+        {
+            'Key':'RoomName', 
+			'Values':[RoomName]
+        }
+			])
+	return response_parn['Rooms'][0]['RoomArn']
+	
+		
+@app.route("/a4b/api/v1.0/update_rooms",methods=['POST'])
+def update_rooms():
+	#client_a4b=create_client()
+	
+	#get roomarn from roomname
+	RoomName=request.json['RoomName']
+	RoomArn=get_room_arn(RoomName)
+	
+	#get profile arn from profile name
+	ProfileName=request.json['ProfileName']
+	ProfileArn=get_profile_arn(ProfileName)
+	
+	#call update room only for changing room profile
+	response= client_a4b.update_room(
+    RoomArn=RoomArn,
+    #RoomName=request.json['RoomName'],
+    #Description=request.json['Description'],
+    #ProviderCalendarId=request.json['ProviderCalendarId'],
+    ProfileArn=ProfileArn)
+	
+	return jsonfiy(response)
+	
+@app.route("/a4b/api/v1.0/delete_rooms",methods=['POST'])
+def delete_rooms():
+	#get roomarn from roomname
+	RoomName=request.json['RoomName']
+	RoomArn=get_room_arn(RoomName)
+	
+	response = client_a4b.delete_room(
+    RoomArn=RoomArn)
+	
+	return list_rooms()
+	
+	
 @app.route("/a4b/api/v1.0/list_rooms",methods=['GET'])
 def list_rooms():	
 	#client_a4b=create_client()
 	response = client_a4b.search_rooms(
 	)
-	return jsonify(response)
-@app.route("/a4b/api/v1.0/update_rooms",methods=['POST'])
-def update_rooms():
-	#client_a4b=create_client()
-	response= client_a4b.update_room(
-    #RoomArn=request.json['RoomArn'],
-    RoomName=request.json['RoomName']
-    #Description=request.json['Description'],
-    #ProviderCalendarId=request.json['ProviderCalendarId'],
-    #ProfileArn=request.json['ProfileArn'])
-	)
-	return jsonfiy(response)
+	rooms=response['Rooms']
+	RoomNameList=[]
+	for room in rooms:
+		RoomNameList.append(room['RoomName'])
+	return jsonify(RoomNameList)
 
-
+	
 if __name__ == "__main__":
 	#app.run(debug=True)
     app.debug = True
