@@ -110,7 +110,7 @@ def list_users():
 def update_users():
 	response=client_iam.update_user(
 	UserName = request.json['UserName'],
-	NewPath = request.json['NewPath'],
+	NewPath = '/'+request.json['NewPath']+'/',
 	NewUserName = request.json['NewUserName'])
 	
 	return jsonify(response)
