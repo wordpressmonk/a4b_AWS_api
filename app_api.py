@@ -226,12 +226,14 @@ def update_rooms():
 @app.route("/a4b/api/v1.0/delete_rooms",methods=['POST'])
 def delete_rooms():
 	#get roomarn from roomname
-	RoomName=request.json['RoomName']
-	RoomArn=get_room_arn(RoomName)
-	
-	response = client_a4b.delete_room(
-    RoomArn=RoomArn)
-	
+	RoomNameList=request.json['RoomName']
+	for OneRoomName in RoomNameList:
+		RoomName=OneRoomName
+		RoomArn=get_room_arn(RoomName)
+		
+		response = client_a4b.delete_room(
+		RoomArn=RoomArn)
+		
 	return list_rooms()
 	
 	
@@ -241,10 +243,18 @@ def list_rooms():
 	response = client_a4b.search_rooms(
 	)
 	rooms=response['Rooms']
-	RoomNameList=[]
+	List_room_info=[]
+	# RoomNameList=[]
+	# RoomProfileList=[]
 	for room in rooms:
-		RoomNameList.append(room['RoomName'])
-	return jsonify(RoomNameList)
+		Roomdict={}
+		Roomdict['RoomName']=room['RoomName']
+		Roomdict['ProfileName']=room['ProfileName']
+		List_room_info.append(Roomdict)
+		#RoomNameList.append(room['RoomName'])
+		#RoomProfileList.append(room['ProfileName'])
+	#List_room_info={"RoomNames":RoomNameList,"ProfileName":RoomProfileList}
+	return jsonify(List_room_info)
 
 	
 if __name__ == "__main__":
