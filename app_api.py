@@ -26,31 +26,32 @@ def main():
 #
 @app.route("/a4b/api/v1.0/add_new_user",methods = ['POST'])
 def add_new_user():
-	#Create User
-	response = client_iam.create_user(
+    print(request.json)
+    #Create User
+    response = client_iam.create_user(
 	Path='/'+request.json['Path']+'/',
 	UserName=request.json['UserName'])
 
-	#Attach only A4B policy to user 
-	response_policy = client_iam.attach_user_policy(
+    #Attach only A4B policy to user 
+    response_policy = client_iam.attach_user_policy(
 	UserName=response['User']['UserName'],#see list IAM users to see all available users
 	PolicyArn='arn:aws:iam::aws:policy/AlexaForBusinessFullAccess')#see get policy arn to list all available policies
 	
-	#Create access Key
-	response_access = client_iam.create_access_key(
+    #Create access Key
+    response_access = client_iam.create_access_key(
 	UserName=response['User']['UserName'])
 	
 	
-	#store access keys in a database for user created
-	response_table=table.put_item(
+    #store access keys in a database for user created
+    response_table=table.put_item(
 	Item={
 		'UserName':response['User']['UserName'],
 		'aws_access_key_id':response_access['AccessKey']['AccessKeyId'],
 		'aws_secret_access_key':response_access['AccessKey']['SecretAccessKey'],
 		'userarn':response['User']['Arn']
 	})
-	#return jsonify(response)
-	return list_users()
+    #return jsonify(response)
+    return list_users()
 	
 @app.route("/a4b/api/v1.0/delete_users",methods=['POST'])
 def delete_users():
