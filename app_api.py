@@ -236,7 +236,7 @@ def delete_room_profile():
 #
 	
 @app.route("/a4b/api/v1.0/add_rooms",methods=['POST'])
-#@handle_stripe
+@handle_stripe
 def add_rooms():
 	#user_a4b=create_client()
 	#get profile arn from profile name
@@ -340,7 +340,15 @@ def list_devices():
 		devices = response['Devices']
 		DeviceList = []
 		for device in devices:
-			DeviceList.append(device['DeviceName'])
+			DeviceDict={}
+			DeviceDict['DeviceName']=device['DeviceName']
+			DeviceDict['DeviceSerialNumber']=device['DeviceSerialNumber']
+			DeviceDict['DeviceType']=device['DeviceType']
+			DeviceDict['DeviceStatus']=device['DeviceStatus']
+			DeviceDict['DeviceName']=device['DeviceName']
+			if "RoomName" in device.keys(): # condition to check if devices are associated with any rooms
+				DeviceDict['RoomName'] = device['RoomName']	
+			DeviceList.append(DeviceDict)
 		return jsonify(DeviceList)
 
 @app.route("/a4b/api/v1.0/update_device",methods=['POST'])
