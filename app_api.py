@@ -333,10 +333,18 @@ def list_rooms():
 #Devices
 #
 	
-@app.route("/a4b/api/v1.0/list_devices",methods=['GET'])
-@handle_stripe
-def list_devices():
-		response = client_a4b.search_devices()
+@app.route("/a4b/api/v1.0/get_devices",methods=['POST'])
+# @handle_stripe
+def get_devices():
+		DeviceName=request.json['DeviceName']
+		response = client_a4b.search_devices(
+		Filters=[
+        {
+            'Key':'DeviceName', 
+			'Values':[DeviceName]
+        }
+			]
+			)
 		devices = response['Devices']
 		DeviceList = []
 		for device in devices:
@@ -350,6 +358,7 @@ def list_devices():
 				DeviceDict['RoomName'] = device['RoomName']	
 			DeviceList.append(DeviceDict)
 		return jsonify(DeviceList)
+		# return jsonify(response)
 
 @app.route("/a4b/api/v1.0/update_device",methods=['POST'])
 @handle_stripe
@@ -362,6 +371,11 @@ def update_device():
 			)
 		return jsonify(response)
 		
+# @app.route("/a4b/api/v1.0/display_device_info",methods=['POST'])
+# @handle_stripe
+# def display_device_info(DeviceName):
+	
+
 def get_device_arn(DeviceName):
 	response = client_a4b.search_devices(
 	Filters=[
@@ -396,7 +410,8 @@ def list_devices_with_rooms():
 		if "RoomName" in device.keys(): # condition to check if devices are associated with any rooms
 			DeviceDict[device['RoomName']] = device['DeviceName']
 	return DeviceDict
-	#return jsonify(devices)
+	#return jsonify(response)
+
 if __name__ == "__main__":
 	#app.run(debug=True)
     app.debug = True
