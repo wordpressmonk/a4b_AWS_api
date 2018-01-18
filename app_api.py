@@ -222,7 +222,7 @@ def delete_room_profile():
 		ProfileArn=ProfileArn
 	)
 		
-	# return list_rooms()
+	# return get_rooms()
 	# ProfileName=request.json['ProfileName']
 	# ProfileArn=get_profile_arn(ProfileName)
 	
@@ -300,33 +300,43 @@ def delete_rooms():
 		response = client_a4b.delete_room(
 		RoomArn=RoomArn)
 		
-	return list_rooms()
+	return get_rooms()
 	
 	
-@app.route("/a4b/api/v1.0/list_rooms",methods=['GET'])
-def list_rooms():	
+@app.route("/a4b/api/v1.0/get_rooms",methods=['POST'])
+def get_rooms():	
 	#client_a4b=create_client()
-	response = client_a4b.search_rooms(
-	)
-	DeviceDict = list_devices_with_rooms()
-	print(DeviceDict)
-	rooms=response['Rooms']
-	List_room_info=[]
-	# RoomNameList=[]
-	# RoomProfileList=[]
-	for room in rooms:
-		Roomdict={}
-		Roomdict['RoomName']=room['RoomName']
-		Roomdict['ProfileName']=room['ProfileName']
-		if room['RoomName'] in DeviceDict.keys():
-			Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
-		else:
-			Roomdict['DeviceName'] = ""
-		List_room_info.append(Roomdict)
-		#RoomNameList.append(room['RoomName'])
-		#RoomProfileList.append(room['ProfileName'])
-	#List_room_info={"RoomNames":RoomNameList,"ProfileName":RoomProfileList}
-	return jsonify(List_room_info)
+    if 'RoomName' in request.json:
+        RoomName=request.json['RoomName']
+        response = client_a4b.search_rooms(
+        Filters=[
+        {
+            'Key':'RoomName', 
+            'Values':[RoomName]
+        }
+        ]
+        )
+    else:
+        response = client_a4b.search_rooms()
+
+    DeviceDict = list_devices_with_rooms()
+    rooms=response['Rooms']
+    List_room_info=[]
+    # RoomNameList=[]
+    # RoomProfileList=[]
+    for room in rooms:
+        Roomdict={}
+        Roomdict['RoomName']=room['RoomName']
+        Roomdict['ProfileName']=room['ProfileName']
+        if room['RoomName'] in DeviceDict.keys():
+            Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
+        else:
+            Roomdict['DeviceName'] = ""
+        List_room_info.append(Roomdict)
+        #RoomNameList.append(room['RoomName'])
+        #RoomProfileList.append(room['ProfileName'])
+    #List_room_info={"RoomNames":RoomNameList,"ProfileName":RoomProfileList}
+    return jsonify(List_room_info)
 	
 
 #
@@ -336,32 +346,32 @@ def list_rooms():
 @app.route("/a4b/api/v1.0/get_devices",methods=['POST'])
 # @handle_stripe
 def get_devices():
-		if 'DeviceName' in request.json:
-			DeviceName=request.json['DeviceName']
-			response = client_a4b.search_devices(
-			Filters=[
-			{
-				'Key':'DeviceName', 
-				'Values':[DeviceName]
-			}
-			]
-			)
-		else:
-			response = client_a4b.search_devices()
-		devices = response['Devices']
-		DeviceList = []
-		for device in devices:
-			DeviceDict={}
-			DeviceDict['DeviceName']=device['DeviceName']
-			DeviceDict['DeviceSerialNumber']=device['DeviceSerialNumber']
-			DeviceDict['DeviceType']=device['DeviceType']
-			DeviceDict['DeviceStatus']=device['DeviceStatus']
-			DeviceDict['DeviceName']=device['DeviceName']
-			if "RoomName" in device.keys(): # condition to check if devices are associated with any rooms
-				DeviceDict['RoomName'] = device['RoomName']	
-			DeviceList.append(DeviceDict)
-		return jsonify(DeviceList)
-		# return jsonify(response)
+        if 'DeviceName' in request.json:
+            DeviceName=request.json['DeviceName']
+            response = client_a4b.search_devices(
+            Filters=[
+            {
+                'Key':'DeviceName', 
+                'Values':[DeviceName]
+            }
+            ]
+            )
+        else:
+            response = client_a4b.search_devices()
+        devices = response['Devices']
+        DeviceList = []
+        for device in devices:
+            DeviceDict={}
+            DeviceDict['DeviceName']=device['DeviceName']
+            DeviceDict['DeviceSerialNumber']=device['DeviceSerialNumber']
+            DeviceDict['DeviceType']=device['DeviceType']
+            DeviceDict['DeviceStatus']=device['DeviceStatus']
+            DeviceDict['DeviceName']=device['DeviceName']
+            if "RoomName" in device.keys(): # condition to check if devices are associated with any rooms
+                DeviceDict['RoomName'] = device['RoomName']	
+            DeviceList.append(DeviceDict)
+        return jsonify(DeviceList)
+        # return jsonify(response)
 
 @app.route("/a4b/api/v1.0/update_device",methods=['POST'])
 @handle_stripe
