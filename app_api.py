@@ -69,7 +69,6 @@ def add_new_user():
     return list_users()
 	
 @app.route("/a4b/api/v1.0/delete_users",methods=['POST'])
-@handle_stripe
 def delete_users():
 	UserNameList=request.json['UserName']
 	for OneUserName in UserNameList:
@@ -166,14 +165,13 @@ def list_room_profile():
 @app.route("/a4b/api/v1.0/get_room_profile_info", methods=['POST'])
 @handle_stripe
 def get_room_profile_info():#ProfileName
-	response_p_info= client_a4b.search_profiles(
-    Filters=[
-        {
-            'Key':'ProfileName', 
-			'Values':[request.json['ProfileName']]
-        }
-			])
-	return jsonify(response_p_info['Profiles'][0])
+	ProfileName=request.json['ProfileName']
+	ProfileArn=get_profile_arn(ProfileName)
+	
+	response_p_info= client_a4b.get_profile(
+		ProfileArn=ProfileArn
+		)
+	return jsonify(response_p_info['Profile'])
 	#return jsonify(response)
 
 def get_profile_arn(ProfileName):
@@ -198,6 +196,7 @@ def update_room_profile():
 	
 	response = client_a4b.update_profile(
     ProfileArn=ProfileArn,
+	ProfileName=request.json['NewProfileName'],
 	Timezone=request.json['Timezone'],
 	Address=request.json['Address'],
 	DistanceUnit=request.json['DistanceUnit'],
