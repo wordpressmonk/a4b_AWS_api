@@ -69,6 +69,7 @@ def add_new_user():
     return list_users()
 	
 @app.route("/a4b/api/v1.0/delete_users",methods=['POST'])
+@handle_stripe
 def delete_users():
 	UserNameList=request.json['UserName']
 	for OneUserName in UserNameList:
@@ -129,7 +130,7 @@ def add_skill_group():
 	return jsonify(response)
 	
 #
-#CRUD for roomprofile
+#CRUD for Room Profile
 #
 	
 @app.route("/a4b/api/v1.0/add_room_profile", methods=['POST'])
@@ -160,7 +161,7 @@ def list_room_profile():
 	for profile in profiles:
 		ProfileNameList.append(profile['ProfileName'])
 	return jsonify(ProfileNameList)
-	#return jsonify(response)
+	
 	
 @app.route("/a4b/api/v1.0/get_room_profile_info", methods=['POST'])
 @handle_stripe
@@ -172,7 +173,7 @@ def get_room_profile_info():#ProfileName
 		ProfileArn=ProfileArn
 		)
 	return jsonify(response_p_info['Profile'])
-	#return jsonify(response)
+	
 
 def get_profile_arn(ProfileName):
 	
@@ -229,6 +230,7 @@ def delete_room_profile():
 		# ProfileArn=ProfileArn
 	# )
 	return list_room_profile()
+
 #
 #CRUD for rooms
 #
@@ -317,7 +319,55 @@ def list_rooms():
 	#List_room_info={"RoomNames":RoomNameList,"ProfileName":RoomProfileList}
 	return jsonify(List_room_info)
 
+#
+#Devices
+#
 	
+@app.route("/a4b/api/v1.0/list_devices",methods=['GET'])
+def list_devices():
+		response = client_a4b.search_devices()
+		devices = response['Devices']
+		DeviceList = []
+		for device in devices:
+			DeviceList.append(device['DeviceName'])
+		return jsonify(DeviceList)
+		
+def get_device_arn(DeviceName):
+	response = client_a4b.search_devices(
+	Filters=[
+        {
+            'Key':'DeviceName', 
+			'Values':[DeviceName]
+        }
+			]
+	)
+	return response['Devices'][0]['DeviceArn']
+	
+@app.route("/a4b/api/v1.0/update_device",methods=['POST'])
+def update_device():
+		DeviceName = request.json['DeviceName']
+		DeviceArn = get_device_arn(DeviceName)
+		response = client_a4b.update_device(
+			DeviceArn=DeviceArn,
+			DeviceName="AbaciesDevice1"
+			)
+		return jsonify(response)
+
+@app.route("/a4b/api/v1.0/associate_device_room",methods=['POST'])
+def associate_device_room():
+	RoomName = request.json["RoomName"]
+	RoomArn = get_room_arn(RoomName)
+	
+	DeviceName =  request.json["DeviceName"]
+	DeviceArn = get_device_arn(DeviceName)
+	
+	response = client_a4b.associate_device_with_room(
+    DeviceArn=DeviceArn,
+    RoomArn=RoomArn)
+	
+	return jsonify(response)
+	
+
 if __name__ == "__main__":
 	#app.run(debug=True)
     app.debug = True
