@@ -161,6 +161,19 @@ def list_room_profile():
 		ProfileNameList.append(profile['ProfileName'])
 	return jsonify(ProfileNameList)
 	#return jsonify(response)
+	
+@app.route("/a4b/api/v1.0/get_room_profile_info", methods=['POST'])
+@handle_stripe
+def get_room_profile_info():#ProfileName
+	response_p_info= client_a4b.search_profiles(
+    Filters=[
+        {
+            'Key':'ProfileName', 
+			'Values':[request.json['ProfileName']]
+        }
+			])
+	return jsonify(response_p_info['Profiles'][0])
+	#return jsonify(response)
 
 def get_profile_arn(ProfileName):
 	
@@ -176,7 +189,8 @@ def get_profile_arn(ProfileName):
 	
 	return response_parn['Profiles'][0]['ProfileArn']
 	
-@app.route("/a4b/api/v1.0/update_room_profile", methods=['POST'])	
+@app.route("/a4b/api/v1.0/update_room_profile", methods=['POST'])
+@handle_stripe	
 def update_room_profile():
 	ProfileName=request.json['ProfileName']
 	ProfileArn=get_profile_arn(ProfileName)
