@@ -400,6 +400,13 @@ def get_device_arn(DeviceName):
 			]
 	)
 	return response['Devices'][0]['DeviceArn']
+
+@app.route("/a4b/api/v1.0/add_room_to_device",methods=['POST'])
+def add_room_to_device():
+    RoomName    = request.json["RoomName"]
+    RoomArn     = get_room_arn(RoomName)
+    DeviceName  = request.json["DeviceName"]
+    return associate_device_room(RoomArn,DeviceName)
 	
 #@app.route("/a4b/api/v1.0/associate_device_room",methods=['POST'])
 def associate_device_room(RoomArn,DeviceName):
