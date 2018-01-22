@@ -376,11 +376,12 @@ def get_devices():
 @app.route("/a4b/api/v1.0/update_device",methods=['POST'])
 @handle_stripe
 def update_device():
-		DeviceName = request.json['DeviceName']
-		DeviceArn = get_device_arn(DeviceName)
+		DeviceName_old = request.json['DeviceName_Old']
+		DeviceName_new = request.json['DeviceName_New']
+		DeviceArn = get_device_arn(DeviceName_old)
 		response = client_a4b.update_device(
 			DeviceArn=DeviceArn,
-			DeviceName="AbaciesDevice1"
+			DeviceName=DeviceName_new
 			)
 		return jsonify(response)
 		
