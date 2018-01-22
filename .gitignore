@@ -1,5 +1,6 @@
 # composer vendor dir
 /venv
+/project_env
 
 # pycache dir
 /__pycache__

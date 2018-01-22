@@ -425,7 +425,31 @@ def list_devices_with_rooms():
 			DeviceDict[device['RoomName']] = device['DeviceName']
 	return DeviceDict
 	#return jsonify(response)
+	
+@app.route("/a4b/api/v1.0/start_device_sync",methods=['POST'])
+def start_device_sync():
+	DeviceName=request.json['DeviceName']	
+	DeviceArn = get_device_arn(DeviceName)
+	
+	response = client_a4b.start_device_sync(
+		DeviceArn=DeviceArn,
+		Features=[
+			'ALL',
+		]
+	)	
+	return jsonify(response)
 
+
+@app.route("/a4b/api/v1.0/disassociate_device_from_room",methods=['POST'])
+def disassociate_device_from_room():
+	DeviceName=request.json['DeviceName']
+	DeviceArn = get_device_arn(DeviceName)
+	response = client_a4b.disassociate_device_from_room(
+		DeviceArn=DeviceArn
+	)
+	
+	return jsonify(response)
+	
 if __name__ == "__main__":
 	#app.run(debug=True)
     app.debug = True
