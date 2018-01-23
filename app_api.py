@@ -483,21 +483,8 @@ def requests_insert():
 	Count=request.form["Count"]
 	response=requests_table.put_item(
 	Item={
-<<<<<<< HEAD
-		'request_name':request.json['requests']['request_name'],
-		'request_type':request.json['requests']['request_type'],
-		'status':request.json['requests']['status'],
-		'guest_request':request.json['requests']['guest_request'],
-		'alexa_response':request.json['requests']['alexa_response'],
-		'notification_Email':request.json['requests']['notification_Email'],
-		'notification_Text':request.json['requests']['notification_Text'],
-		'notification_Call':request.json['requests']['notification_Call'],
-		'notification_Temp':request.json['requests']['notification_Temp']
-=======
 		'request_name':request_name,
 		'OtherDetails':OtherDetails
-		
->>>>>>> 33da2384bc63839c088ff5323870b099a11a7d77
 	})
 	response=requests_QA.put_item(
 	Item={
