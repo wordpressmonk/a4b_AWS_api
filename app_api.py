@@ -7,8 +7,10 @@ from botocore.exceptions import ClientError
 client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
 client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
 client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
+
 table=client_dynamodb.Table('IamUser')
 requests_table=client_dynamodb.Table('Requests')
+requests_QA=client_dynamodb.Table('Requests')
 
 app=Flask(__name__)
 
@@ -344,7 +346,7 @@ def get_rooms():
 #
 	
 @app.route("/a4b/api/v1.0/get_devices",methods=['POST'])
-# @handle_stripe
+@handle_stripe
 def get_devices():
         if 'DeviceName' in request.json:
             DeviceName=request.json['DeviceName']
@@ -402,6 +404,7 @@ def get_device_arn(DeviceName):
 	return response['Devices'][0]['DeviceArn']
 
 @app.route("/a4b/api/v1.0/add_room_to_device",methods=['POST'])
+@handle_stripe
 def add_room_to_device():
     RoomName    = request.json["RoomName"]
     RoomArn     = get_room_arn(RoomName)
@@ -434,6 +437,7 @@ def list_devices_with_rooms():
 	#return jsonify(response)
 	
 @app.route("/a4b/api/v1.0/start_device_sync",methods=['POST'])
+@handle_stripe
 def start_device_sync():
 	DeviceName=request.json['DeviceName']	
 	DeviceArn = get_device_arn(DeviceName)
@@ -448,6 +452,7 @@ def start_device_sync():
 
 
 @app.route("/a4b/api/v1.0/disassociate_device_from_room",methods=['POST'])
+@handle_stripe
 def disassociate_device_from_room():
 	DeviceName=request.json['DeviceName']
 	DeviceArn = get_device_arn(DeviceName)
@@ -456,11 +461,29 @@ def disassociate_device_from_room():
 	)
 	
 	return jsonify(response)
-    
+
+#
+#Database functions
+#
+	
 @app.route("/a4b/api/v1.0/requests_insert",methods=['POST'])
-def requests_insert():    
-    response=requests_table.put_item(
+def requests_insert():
+	RequestName = request.form["RequestName"].lower()
+	OtherDetails={}
+	OtherDetails['Status']=request.form["Status"]
+	OtherDetails['RequestType']=request.form["RequestType"]
+	if "EmailChecked" in request.form:
+		OtherDetails["EmailID"]=request.form["EmailID"]
+	if "TextChecked" in request.form:
+		OtherDetails["TextNumber"]=request.form["TextNumber"]
+	if "CallChecked" in request.form:
+		OtherDetails["CallNumber"]=request.form["CallNumber"]
+	OtherDetails["NotificationTemplate"]=request.form["NotificationTemplate"]
+	QA=request.form["QA"]
+	Count=request.form["Count"]
+	response=requests_table.put_item(
 	Item={
+<<<<<<< HEAD
 		'request_name':request.json['requests']['request_name'],
 		'request_type':request.json['requests']['request_type'],
 		'status':request.json['requests']['status'],
@@ -470,8 +493,27 @@ def requests_insert():
 		'notification_Text':request.json['requests']['notification_Text'],
 		'notification_Call':request.json['requests']['notification_Call'],
 		'notification_Temp':request.json['requests']['notification_Temp']
+=======
+		'request_name':request_name,
+		'OtherDetails':OtherDetails
+		
+>>>>>>> 33da2384bc63839c088ff5323870b099a11a7d77
 	})
-    
+	response=requests_QA.put_item(
+	Item={
+		'request_name':request_name,
+		'QAs':QA,
+		'Count':Count
+		
+	})
+	#return display_menu()
+	return jsonify(response)
+	
+@app.route("/a4b/api/v1.0/requests_read",methods=['POST'])	
+def requests_read():
+	response_requests = requests_table.scan()
+	response_QA = requests_QA.scan()
+	return jsonify(response_requests,response_QA)
 	
 if __name__ == "__main__":
 	#app.run(debug=True)
