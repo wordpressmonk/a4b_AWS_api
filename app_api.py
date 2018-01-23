@@ -8,6 +8,7 @@ client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_a
 client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
 client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
 table=client_dynamodb.Table('IamUser')
+requests_table=client_dynamodb.Table('Requests')
 
 app=Flask(__name__)
 
@@ -41,7 +42,6 @@ def main():
 @app.route("/a4b/api/v1.0/add_new_user",methods = ['POST'])
 @handle_stripe
 def add_new_user():
-    print(request.json)
     #Create User
     response = client_iam.create_user(
 	Path='/'+request.json['Path']+'/',
@@ -222,7 +222,7 @@ def delete_room_profile():
 		ProfileArn=ProfileArn
 	)
 		
-	# return list_rooms()
+	# return get_rooms()
 	# ProfileName=request.json['ProfileName']
 	# ProfileArn=get_profile_arn(ProfileName)
 	
@@ -300,33 +300,43 @@ def delete_rooms():
 		response = client_a4b.delete_room(
 		RoomArn=RoomArn)
 		
-	return list_rooms()
+	return get_rooms()
 	
 	
-@app.route("/a4b/api/v1.0/list_rooms",methods=['GET'])
-def list_rooms():	
+@app.route("/a4b/api/v1.0/get_rooms",methods=['POST'])
+def get_rooms():	
 	#client_a4b=create_client()
-	response = client_a4b.search_rooms(
-	)
-	DeviceDict = list_devices_with_rooms()
-	print(DeviceDict)
-	rooms=response['Rooms']
-	List_room_info=[]
-	# RoomNameList=[]
-	# RoomProfileList=[]
-	for room in rooms:
-		Roomdict={}
-		Roomdict['RoomName']=room['RoomName']
-		Roomdict['ProfileName']=room['ProfileName']
-		if room['RoomName'] in DeviceDict.keys():
-			Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
-		else:
-			Roomdict['DeviceName'] = ""
-		List_room_info.append(Roomdict)
-		#RoomNameList.append(room['RoomName'])
-		#RoomProfileList.append(room['ProfileName'])
-	#List_room_info={"RoomNames":RoomNameList,"ProfileName":RoomProfileList}
-	return jsonify(List_room_info)
+    if 'RoomName' in request.json:
+        RoomName=request.json['RoomName']
+        response = client_a4b.search_rooms(
+        Filters=[
+        {
+            'Key':'RoomName', 
+            'Values':[RoomName]
+        }
+        ]
+        )
+    else:
+        response = client_a4b.search_rooms()
+
+    DeviceDict = list_devices_with_rooms()
+    rooms=response['Rooms']
+    List_room_info=[]
+    # RoomNameList=[]
+    # RoomProfileList=[]
+    for room in rooms:
+        Roomdict={}
+        Roomdict['RoomName']=room['RoomName']
+        Roomdict['ProfileName']=room['ProfileName']
+        if room['RoomName'] in DeviceDict.keys():
+            Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
+        else:
+            Roomdict['DeviceName'] = ""
+        List_room_info.append(Roomdict)
+        #RoomNameList.append(room['RoomName'])
+        #RoomProfileList.append(room['ProfileName'])
+    #List_room_info={"RoomNames":RoomNameList,"ProfileName":RoomProfileList}
+    return jsonify(List_room_info)
 	
 
 #
@@ -336,41 +346,42 @@ def list_rooms():
 @app.route("/a4b/api/v1.0/get_devices",methods=['POST'])
 @handle_stripe
 def get_devices():
-		if 'DeviceName' in request.json:
-			DeviceName=request.json['DeviceName']
-			response = client_a4b.search_devices(
-			Filters=[
-			{
-				'Key':'DeviceName', 
-				'Values':[DeviceName]
-			}
-			]
-			)
-		else:
-			response = client_a4b.search_devices()
-		devices = response['Devices']
-		DeviceList = []
-		for device in devices:
-			DeviceDict={}
-			DeviceDict['DeviceName']=device['DeviceName']
-			DeviceDict['DeviceSerialNumber']=device['DeviceSerialNumber']
-			DeviceDict['DeviceType']=device['DeviceType']
-			DeviceDict['DeviceStatus']=device['DeviceStatus']
-			DeviceDict['DeviceName']=device['DeviceName']
-			if "RoomName" in device.keys(): # condition to check if devices are associated with any rooms
-				DeviceDict['RoomName'] = device['RoomName']	
-			DeviceList.append(DeviceDict)
-		return jsonify(DeviceList)
-		# return jsonify(response)
+        if 'DeviceName' in request.json:
+            DeviceName=request.json['DeviceName']
+            response = client_a4b.search_devices(
+            Filters=[
+            {
+                'Key':'DeviceName', 
+                'Values':[DeviceName]
+            }
+            ]
+            )
+        else:
+            response = client_a4b.search_devices()
+        devices = response['Devices']
+        DeviceList = []
+        for device in devices:
+            DeviceDict={}
+            DeviceDict['DeviceName']=device['DeviceName']
+            DeviceDict['DeviceSerialNumber']=device['DeviceSerialNumber']
+            DeviceDict['DeviceType']=device['DeviceType']
+            DeviceDict['DeviceStatus']=device['DeviceStatus']
+            DeviceDict['DeviceName']=device['DeviceName']
+            if "RoomName" in device.keys(): # condition to check if devices are associated with any rooms
+                DeviceDict['RoomName'] = device['RoomName']	
+            DeviceList.append(DeviceDict)
+        return jsonify(DeviceList)
+        # return jsonify(response)
 
 @app.route("/a4b/api/v1.0/update_device",methods=['POST'])
 @handle_stripe
 def update_device():
-		DeviceName = request.json['DeviceName']
-		DeviceArn = get_device_arn(DeviceName)
+		DeviceName_old = request.json['DeviceName_Old']
+		DeviceName_new = request.json['DeviceName_New']
+		DeviceArn = get_device_arn(DeviceName_old)
 		response = client_a4b.update_device(
 			DeviceArn=DeviceArn,
-			DeviceName="AbaciesDevice1"
+			DeviceName=DeviceName_new
 			)
 		return jsonify(response)
 		
@@ -389,6 +400,13 @@ def get_device_arn(DeviceName):
 			]
 	)
 	return response['Devices'][0]['DeviceArn']
+
+@app.route("/a4b/api/v1.0/add_room_to_device",methods=['POST'])
+def add_room_to_device():
+    RoomName    = request.json["RoomName"]
+    RoomArn     = get_room_arn(RoomName)
+    DeviceName  = request.json["DeviceName"]
+    return associate_device_room(RoomArn,DeviceName)
 	
 #@app.route("/a4b/api/v1.0/associate_device_room",methods=['POST'])
 def associate_device_room(RoomArn,DeviceName):
@@ -414,7 +432,47 @@ def list_devices_with_rooms():
 			DeviceDict[device['RoomName']] = device['DeviceName']
 	return DeviceDict
 	#return jsonify(response)
+	
+@app.route("/a4b/api/v1.0/start_device_sync",methods=['POST'])
+def start_device_sync():
+	DeviceName=request.json['DeviceName']	
+	DeviceArn = get_device_arn(DeviceName)
+	
+	response = client_a4b.start_device_sync(
+		DeviceArn=DeviceArn,
+		Features=[
+			'ALL',
+		]
+	)	
+	return jsonify(response)
 
+
+@app.route("/a4b/api/v1.0/disassociate_device_from_room",methods=['POST'])
+def disassociate_device_from_room():
+	DeviceName=request.json['DeviceName']
+	DeviceArn = get_device_arn(DeviceName)
+	response = client_a4b.disassociate_device_from_room(
+		DeviceArn=DeviceArn
+	)
+	
+	return jsonify(response)
+    
+@app.route("/a4b/api/v1.0/requests_insert",methods=['POST'])
+def requests_insert():    
+    response=requests_table.put_item(
+	Item={
+		'request_name':response['requests']['request_name'],
+		'request_type':response_access['requests']['request_type'],
+		'status':response_access['requests']['status'],
+		'guest_request':response['requests']['guest_request'],
+		'alexa_response':response['requests']['alexa_response'],
+		'notification_Email':response['requests']['notification_Email'],
+		'notification_Text':response['requests']['notification_Text'],
+		'notification_Call':response['requests']['notification_Call'],
+		'notification_Temp':response['requests']['notification_Temp']
+	})
+    
+	
 if __name__ == "__main__":
 	#app.run(debug=True)
     app.debug = True
