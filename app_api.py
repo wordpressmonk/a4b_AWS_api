@@ -461,15 +461,15 @@ def disassociate_device_from_room():
 def requests_insert():    
     response=requests_table.put_item(
 	Item={
-		'request_name':response['requests']['request_name'],
-		'request_type':response_access['requests']['request_type'],
-		'status':response_access['requests']['status'],
-		'guest_request':response['requests']['guest_request'],
-		'alexa_response':response['requests']['alexa_response'],
-		'notification_Email':response['requests']['notification_Email'],
-		'notification_Text':response['requests']['notification_Text'],
-		'notification_Call':response['requests']['notification_Call'],
-		'notification_Temp':response['requests']['notification_Temp']
+		'request_name':request.json['requests']['request_name'],
+		'request_type':request.json['requests']['request_type'],
+		'status':request.json['requests']['status'],
+		'guest_request':request.json['requests']['guest_request'],
+		'alexa_response':request.json['requests']['alexa_response'],
+		'notification_Email':request.json['requests']['notification_Email'],
+		'notification_Text':request.json['requests']['notification_Text'],
+		'notification_Call':request.json['requests']['notification_Call'],
+		'notification_Temp':request.json['requests']['notification_Temp']
 	})
     
 	
