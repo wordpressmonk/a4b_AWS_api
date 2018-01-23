@@ -334,7 +334,7 @@ def list_rooms():
 #
 	
 @app.route("/a4b/api/v1.0/get_devices",methods=['POST'])
-# @handle_stripe
+@handle_stripe
 def get_devices():
 		if 'DeviceName' in request.json:
 			DeviceName=request.json['DeviceName']
