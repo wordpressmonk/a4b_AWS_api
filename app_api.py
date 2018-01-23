@@ -8,6 +8,7 @@ client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_a
 client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
 client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
 table=client_dynamodb.Table('IamUser')
+requests_table=client_dynamodb.Table('Requests')
 
 app=Flask(__name__)
 
@@ -41,7 +42,6 @@ def main():
 @app.route("/a4b/api/v1.0/add_new_user",methods = ['POST'])
 @handle_stripe
 def add_new_user():
-    print(request.json)
     #Create User
     response = client_iam.create_user(
 	Path='/'+request.json['Path']+'/',
@@ -456,6 +456,22 @@ def disassociate_device_from_room():
 	)
 	
 	return jsonify(response)
+    
+@app.route("/a4b/api/v1.0/requests_insert",methods=['POST'])
+def requests_insert():    
+    response=requests_table.put_item(
+	Item={
+		'request_name':response['requests']['request_name'],
+		'request_type':response_access['requests']['request_type'],
+		'status':response_access['requests']['status'],
+		'guest_request':response['requests']['guest_request'],
+		'alexa_response':response['requests']['alexa_response'],
+		'notification_Email':response['requests']['notification_Email'],
+		'notification_Text':response['requests']['notification_Text'],
+		'notification_Call':response['requests']['notification_Call'],
+		'notification_Temp':response['requests']['notification_Temp']
+	})
+    
 	
 if __name__ == "__main__":
 	#app.run(debug=True)
