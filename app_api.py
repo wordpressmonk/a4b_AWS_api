@@ -106,6 +106,14 @@ def delete_users():
 def list_users():
 	response=client_iam.list_users()
 	return jsonify(response)
+    
+@app.route("/a4b/api/v1.0/get_users",methods=['GET','POST'])
+@handle_stripe
+def get_users():
+    response = client_iam.get_user(
+        UserName=request.get['UserName']
+    )
+    return jsonify(response)  
 	
 @app.route("/a4b/api/v1.0/update_users",methods=['POST'])
 @handle_stripe
