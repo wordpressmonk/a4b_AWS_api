@@ -511,28 +511,29 @@ def requests_insert():
 	#return display_menu()
 	return jsonify(response)
 	
-@app.route("/a4b/api/v1.0/requests_read",methods=['POST'])	
-def requests_read():
-	response = requests_table.scan()
+@app.route("/a4b/api/v1.0/request_info",methods=['POST'])	
+def request_info():
+# For particular request
+	response = requests_table.query(
+		KeyConditionExpression=Key('request_name').eq(request.json['request_name'])
+		)
 	
 	return jsonify(response['Items'])
 
-# @app.route("/a4b/api/v1.0/requests_update",methods=['POST'])	
-# def requests_update():
-	# response=requests_table.update_item(
-	# Key={
-		# 'request_name':request.json['request_name']
-		# },
-	# UpdateExpression = 'SET #S = :val1',
-	# ExpressionAttributeValues={
-		# ':val1':'Inactive'
-		# },
-	# ExpressionAttributeNames={"#S":"Status"}
+@app.route("/a4b/api/v1.0/requests_read",methods=['GET'])	
+def requests_read():
+#To get information of all requests in table
+	response = requests_table.scan()
+	return jsonify(response['Items'])
 	
-	# )
-	# return jsonify(response)
-
-
+@app.route("/a4b/api/v1.0/requests_delete",methods=['POST'])
+def requests_delete():
+    response = requests_table.delete_item(
+        Key={
+            'request_name': 'api-request'
+        }
+    )
+    return jsonify(response)
 
 if __name__ == "__main__":
 	#app.run(debug=True)
