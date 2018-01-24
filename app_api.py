@@ -106,6 +106,14 @@ def delete_users():
 def list_users():
 	response=client_iam.list_users()
 	return jsonify(response)
+    
+@app.route("/a4b/api/v1.0/get_users",methods=['POST'])
+@handle_stripe
+def get_users():
+    response = client_iam.get_user(
+        UserName=request.json['UserName']
+    )
+    return jsonify(response)  
 	
 @app.route("/a4b/api/v1.0/update_users",methods=['POST'])
 @handle_stripe
@@ -469,6 +477,7 @@ def disassociate_device_from_room():
 @app.route("/a4b/api/v1.0/requests_insert",methods=['POST'])
 def requests_insert():
 	OtherDetails={}
+
 	OtherDetails['request_name'] = request.json['RequestName'].lower()
 	OtherDetails['Status']=request.json["Status"]
 	OtherDetails['RequestType']=request.json["RequestType"]
