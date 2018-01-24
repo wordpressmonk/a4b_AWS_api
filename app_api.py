@@ -107,11 +107,11 @@ def list_users():
 	response=client_iam.list_users()
 	return jsonify(response)
     
-@app.route("/a4b/api/v1.0/get_users",methods=['GET','POST'])
+@app.route("/a4b/api/v1.0/get_users",methods=['POST'])
 @handle_stripe
 def get_users():
     response = client_iam.get_user(
-        UserName=request.get['UserName']
+        UserName=request.json['UserName']
     )
     return jsonify(response)  
 	
