@@ -3,6 +3,7 @@ import os,json,boto3
 from config import *
 from functools import wraps
 from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key, Attr
 
 client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
 client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
@@ -10,7 +11,6 @@ client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,
 
 table=client_dynamodb.Table('IamUser')
 requests_table=client_dynamodb.Table('Requests')
-requests_QA=client_dynamodb.Table('Requests')
 
 app=Flask(__name__)
 
@@ -468,41 +468,54 @@ def disassociate_device_from_room():
 	
 @app.route("/a4b/api/v1.0/requests_insert",methods=['POST'])
 def requests_insert():
-	RequestName = request.form["RequestName"].lower()
 	OtherDetails={}
-	OtherDetails['Status']=request.form["Status"]
-	OtherDetails['RequestType']=request.form["RequestType"]
-	if "EmailChecked" in request.form:
-		OtherDetails["EmailID"]=request.form["EmailID"]
-	if "TextChecked" in request.form:
-		OtherDetails["TextNumber"]=request.form["TextNumber"]
-	if "CallChecked" in request.form:
-		OtherDetails["CallNumber"]=request.form["CallNumber"]
-	OtherDetails["NotificationTemplate"]=request.form["NotificationTemplate"]
-	QA=request.form["QA"]
-	Count=request.form["Count"]
+	OtherDetails['request_name'] = request.json['RequestName'].lower()
+	OtherDetails['Status']=request.json["Status"]
+	OtherDetails['RequestType']=request.json["RequestType"]
+	OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
+	
+	if "Check_Email" in request.json and request.json["Check_Email"]== "1":
+		OtherDetails['EmailID']=request.json["EmailID"]
+		
+	if "Check_Text" in request.json and request.json["Check_Text"]== "1":
+		OtherDetails['TextNumber']=request.json["TextNumber"]
+		
+	if "Check_Call" in request.json and request.json["Check_Call"]== "1":
+		OtherDetails['CallNumber']=request.json["CallNumber"]
+		
+	
+	Level=int(request.json["Level"])
+	OtherDetails['Level']=request.json["Level"]
+	for i in range(Level):
+		Q = request.json["Q"+str(i+1)]
+		A = request.json["A"+str(i+1)]
+		
+		OtherDetails["Q"+str(i+1)]= Q
+		OtherDetails["A"+str(i+1)]= A
+		
+	for key,value in OtherDetails.items():
+		print(key+":"+value)
+		
 	response=requests_table.put_item(
-	Item={
-		'request_name':request_name,
-		'OtherDetails':OtherDetails
-		
-	})
-	response=requests_QA.put_item(
-	Item={
-		'request_name':request_name,
-		'QAs':QA,
-		'Count':Count
-		
-	})
+	Item=OtherDetails)
+	
 	#return display_menu()
 	return jsonify(response)
 	
 @app.route("/a4b/api/v1.0/requests_read",methods=['POST'])	
 def requests_read():
-	response_requests = requests_table.scan()
-	response_QA = requests_QA.scan()
-	return jsonify(response_requests,response_QA)
+	response = requests_table.query(
+		KeyConditionExpression=Key('request_name').eq(request.json['request_name'])
+		)
 	
+	return jsonify(response['Items'])
+
+# @app.route("/a4b/api/v1.0/requests_update",methods=['POST'])	
+# def requests_update():
+	
+
+
+
 if __name__ == "__main__":
 	#app.run(debug=True)
     app.debug = True
