@@ -462,58 +462,60 @@ def start_device_sync():
 @app.route("/a4b/api/v1.0/disassociate_device_from_room",methods=['POST'])
 @handle_stripe
 def disassociate_device_from_room():
-	DeviceName=request.json['DeviceName']
-	DeviceArn = get_device_arn(DeviceName)
-	response = client_a4b.disassociate_device_from_room(
-		DeviceArn=DeviceArn
-	)
-	
-	return jsonify(response)
+    DeviceName=request.json['DeviceName']
+    DeviceArn = get_device_arn(DeviceName)
+    response = client_a4b.disassociate_device_from_room(
+        DeviceArn=DeviceArn
+    )
 
-#
-#Database functions
-#
-	
+    return jsonify(response)
+
+    #
+    #Database functions
+    #
+
 @app.route("/a4b/api/v1.0/requests_insert",methods=['POST'])
 def requests_insert():
-	#to verify if the request is duplicate
-	response=requests_table.query(
-		KeyConditionExpression=Key('request_name').eq(request.json['request_name'].lower())
-		)
-	request_exist=response['Items']
-	if not request_exist:
-		#if the request_name not in dynamodb, then create the request
-		OtherDetails={}
-		OtherDetails['request_name'] = request.json['request_name'].lower()
-		OtherDetails['Status']=request.json["Status"]
-		OtherDetails['RequestType']=request.json["RequestType"]
-		OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
-		if "Check_Email" in request.json and request.json["Check_Email"]== "1":
-			OtherDetails['EmailID']=request.json["EmailID"]
-			
-		if "Check_Text" in request.json and request.json["Check_Text"]== "1":
-			OtherDetails['TextNumber']=request.json["TextNumber"]
-			
-		if "Check_Call" in request.json and request.json["Check_Call"]== "1":
-			OtherDetails['CallNumber']=request.json["CallNumber"]
-			
-		
-		Level=int(request.json["Level"])
-		OtherDetails['Level']=request.json["Level"]
-		for i in range(Level):
-			Q = request.json["Q"+str(i+1)]
-			A = request.json["A"+str(i+1)]
-			
-			OtherDetails["Q"+str(i+1)]= Q
-			OtherDetails["A"+str(i+1)]= A
-		
-		response=requests_table.put_item(
-		Item=OtherDetails)
-		
-		#return display_menu()
-		return jsonify(response)
-	else:
-		return("Request already exists. Please delete the request and create request again")
+    #to verify if the request is duplicate
+    response=requests_table.query(
+        KeyConditionExpression=Key('request_name').eq(request.json['request_name'].lower())
+        )
+    request_exist=response['Items']
+    if not request_exist:
+        #if the request_name not in dynamodb, then create the request
+        OtherDetails={}
+        OtherDetails['request_name'] = request.json['request_name'].lower()
+        OtherDetails['Status']=request.json["Status"]
+        OtherDetails['RequestType']=request.json["RequestType"]
+        OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
+        if "Check_Email" in request.json and request.json["Check_Email"]== "1":
+            OtherDetails['EmailID']=request.json["EmailID"]
+            
+        if "Check_Text" in request.json and request.json["Check_Text"]== "1":
+            OtherDetails['TextNumber']=request.json["TextNumber"]
+            
+        if "Check_Call" in request.json and request.json["Check_Call"]== "1":
+            OtherDetails['CallNumber']=request.json["CallNumber"]
+            
+        
+        Level=int(request.json["Level"])
+        OtherDetails['Level']=request.json["Level"]
+        for i in range(Level):
+            if request.json["Q"+str(i+1)]:
+                Q = request.json["Q"+str(i+1)]
+            if request.json["A"+str(i+1)]:    
+                A = request.json["A"+str(i+1)]
+            
+            OtherDetails["Q"+str(i+1)]= Q
+            OtherDetails["A"+str(i+1)]= A
+        print(jsonify(OtherDetails))
+        response=requests_table.put_item(
+        Item=OtherDetails)
+        
+        #return display_menu()
+        print(str(OtherDetails['TextNumber']))
+    else:
+        return("Request already exists. Please delete the request and create request again")
 	
 @app.route("/a4b/api/v1.0/request_info",methods=['POST'])	
 def request_info():
