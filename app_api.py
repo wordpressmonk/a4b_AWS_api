@@ -488,7 +488,6 @@ def requests_insert():
 		OtherDetails['Status']=request.json["Status"]
 		OtherDetails['RequestType']=request.json["RequestType"]
 		OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
-		
 		if "Check_Email" in request.json and request.json["Check_Email"]== "1":
 			OtherDetails['EmailID']=request.json["EmailID"]
 			
