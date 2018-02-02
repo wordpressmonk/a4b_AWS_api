@@ -11,6 +11,7 @@ client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,
 
 table=client_dynamodb.Table('IamUser')
 requests_table=client_dynamodb.Table('Requests')
+ResponseTable=client_dynamodb.Table('Response')
 
 app=Flask(__name__)
 
@@ -262,17 +263,19 @@ def add_rooms():
 	return associate_device_room(response['RoomArn'],request.json['DeviceName'])
 
 	
-
-def get_room_arn(RoomName):
+@app.route("/a4b/api/v1.0/get_room_arn",methods=['POST'])
+#def get_room_arn(RoomName):
+def get_room_arn():
 	response_parn= client_a4b.search_rooms(
     Filters=[
         {
             'Key':'RoomName', 
-			'Values':[RoomName]
+			#'Values':[RoomName]
+			'Values':[request.json['RoomName']]
         }
 			])
-	return response_parn['Rooms'][0]['RoomArn']
-	#return jsonify(response_parn['Rooms'])
+	#return response_parn['Rooms'][0]['RoomArn']
+	return jsonify(response_parn['Rooms'])
 	
 		
 @app.route("/a4b/api/v1.0/update_rooms",methods=['POST'])
@@ -485,9 +488,10 @@ def requests_insert():
 		#if the request_name not in dynamodb, then create the request
 		OtherDetails={}
 		OtherDetails['request_name'] = request.json['request_name'].lower()
-		OtherDetails['Status']=request.json["Status"]
+		OtherDetails['Status']=request.json["Status"].lower()
 		OtherDetails['RequestType']=request.json["RequestType"]
 		OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
+		OtherDetails['Conversation']=request.json["Conversation"]
 		
 		if "Check_Email" in request.json and request.json["Check_Email"]== "1":
 			OtherDetails['EmailID']=request.json["EmailID"]
@@ -499,14 +503,14 @@ def requests_insert():
 			OtherDetails['CallNumber']=request.json["CallNumber"]
 			
 		
-		Level=int(request.json["Level"])
-		OtherDetails['Level']=request.json["Level"]
-		for i in range(Level):
-			Q = request.json["Q"+str(i+1)]
-			A = request.json["A"+str(i+1)]
+		#Level=int(request.json["Level"])
+		# OtherDetails['Level']=request.json["Level"]
+		# for i in range(Level):
+			# Q = request.json["Q"+str(i+1)]
+			# A = request.json["A"+str(i+1)]
 			
-			OtherDetails["Q"+str(i+1)]= Q
-			OtherDetails["A"+str(i+1)]= A
+			# OtherDetails["Q"+str(i+1)]= Q
+			# OtherDetails["A"+str(i+1)]= A
 		
 		response=requests_table.put_item(
 		Item=OtherDetails)
@@ -552,6 +556,38 @@ def requests_delete():
     )
 		
 	return jsonify(response)
+	
+#
+#Skill Parameter
+#
+@app.route("/a4b/api/v1.0/put_room_skill_parameter",methods=['GET'])
+def put_room_skill_parameter():
+	response = client_a4b.put_room_skill_parameter(
+		RoomArn='arn:aws:a4b:us-east-1:512990229200:room/a6aff17cde32fc80af99aeda76ce9f98/f8b07f823e96757a2d9b4556a0916452',
+		SkillId='cnkdjncsdjcnjdsnd',
+		RoomSkillParameter={
+			'ParameterKey': 'SCOPE',
+			'ParameterValue': 'dcdcd'
+		}
+	)
+	return jsonify(response)
+
+@app.route("/a4b/api/v1.0/put_response",methods=['GET'])
+def put_response():	
+	scan_response=ResponseTable.scan()
+	response=ResponseTable.put_item(
+	Item={
+		'ResponseID':scan_response['Count']+1,
+		'ResquestType':'Valet'
+	})
+	return jsonify(response)
+	
+@app.route("/a4b/api/v1.0/scan_response",methods=['GET'])
+def scan_response():	
+	response=ResponseTable.scan()
+	
+	return jsonify(response)
+
 
 if __name__ == "__main__":
 	#app.run(debug=True)
