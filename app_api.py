@@ -465,20 +465,21 @@ def start_device_sync():
 @app.route("/a4b/api/v1.0/disassociate_device_from_room",methods=['POST'])
 @handle_stripe
 def disassociate_device_from_room():
-	DeviceName=request.json['DeviceName']
-	DeviceArn = get_device_arn(DeviceName)
-	response = client_a4b.disassociate_device_from_room(
-		DeviceArn=DeviceArn
-	)
-	
-	return jsonify(response)
+    DeviceName=request.json['DeviceName']
+    DeviceArn = get_device_arn(DeviceName)
+    response = client_a4b.disassociate_device_from_room(
+        DeviceArn=DeviceArn
+    )
 
-#
-#Database functions
-#
-	
+    return jsonify(response)
+
+    #
+    #Database functions
+    #
+
 @app.route("/a4b/api/v1.0/requests_insert",methods=['POST'])
 def requests_insert():
+
 	#to verify if the request is duplicate
 	response=requests_table.query(
 		KeyConditionExpression=Key('request_name').eq(request.json['request_name'].lower())
@@ -519,7 +520,7 @@ def requests_insert():
 		return jsonify(response)
 	else:
 		return("Request already exists. Please delete the request and create request again")
-	
+
 @app.route("/a4b/api/v1.0/request_info",methods=['POST'])	
 def request_info():
 # For particular request
