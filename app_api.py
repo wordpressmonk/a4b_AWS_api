@@ -586,8 +586,8 @@ def put_response():
 	
 @app.route("/a4b/api/v1.0/scan_response",methods=['POST'])
 def scan_response():    
-    lessdate = request.json['lesser_date']
-    greaterdate = request.json['greater_date']
+    startdate = request.json['startdate']
+    enddate = request.json['enddate']
     response=ResponseTable.scan()
     result={}
     result['Items']=[]
@@ -595,7 +595,7 @@ def scan_response():
     for k,row in enumerate(response['Items']):
         date =  row['Date']
         olddate = date.split(",")
-        if olddate[0] >= lessdate and olddate[0] <= greaterdate:
+        if olddate[0] >= startdate and olddate[0] <= enddate:
             count+=1
             
             result['Items'].append(row)
