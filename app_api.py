@@ -4,6 +4,7 @@ from config import *
 from functools import wraps
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key, Attr
+import time
 
 client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
 client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
@@ -583,11 +584,24 @@ def put_response():
 	})
 	return jsonify(response)
 	
-@app.route("/a4b/api/v1.0/scan_response",methods=['GET'])
-def scan_response():	
-	response=ResponseTable.scan()
-	
-	return jsonify(response)
+@app.route("/a4b/api/v1.0/scan_response",methods=['POST'])
+def scan_response():    
+    lessdate = request.json['lesser_date']
+    greaterdate = request.json['greater_date']
+    response=ResponseTable.scan()
+    result={}
+    result['Items']=[]
+    count=0
+    for k,row in enumerate(response['Items']):
+        date =  row['Date']
+        olddate = date.split(",")
+        if olddate[0] >= lessdate and olddate[0] <= greaterdate:
+            count+=1
+            
+            result['Items'].append(row)
+    result['Count']=count
+    
+    return jsonify(result)
 
 
 if __name__ == "__main__":
