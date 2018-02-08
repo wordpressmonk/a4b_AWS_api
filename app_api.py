@@ -376,11 +376,11 @@ def get_devices():
         DeviceList = []
         for device in devices:
             DeviceDict={}
-            DeviceDict['DeviceName']=device['DeviceName']
-            DeviceDict['DeviceSerialNumber']=device['DeviceSerialNumber']
-            DeviceDict['DeviceType']=device['DeviceType']
-            DeviceDict['DeviceStatus']=device['DeviceStatus']
-            DeviceDict['DeviceName']=device['DeviceName']
+            DeviceDict['DeviceName']=device['DeviceName'] if 'DeviceName' in device else ''
+            DeviceDict['DeviceSerialNumber']=device['DeviceSerialNumber'] if 'DeviceSerialNumber' in device else ''
+            DeviceDict['DeviceType']=device['DeviceType'] if 'DeviceType' in device else ''
+            DeviceDict['DeviceStatus']=device['DeviceStatus'] if 'DeviceStatus' in device else ''
+            DeviceDict['DeviceName']=device['DeviceName'] if 'DeviceName' in device else ''
             if "RoomName" in device.keys(): # condition to check if devices are associated with any rooms
                 DeviceDict['RoomName'] = device['RoomName']	
             DeviceList.append(DeviceDict)
