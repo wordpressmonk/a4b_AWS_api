@@ -586,22 +586,27 @@ def put_response():
 	
 @app.route("/a4b/api/v1.0/scan_response",methods=['POST'])
 def scan_response():    
-    startdate = request.json['startdate']
-    enddate = request.json['enddate']
-    response=ResponseTable.scan()
-    result={}
-    result['Items']=[]
-    count=0
-    for k,row in enumerate(response['Items']):
-        date =  row['Date']
-        olddate = date.split(",")
-        if olddate[0] >= startdate and olddate[0] <= enddate:
-            count+=1
-            
-            result['Items'].append(row)
-    result['Count']=count
-    
-    return jsonify(result)
+    if 'startdate' in request.json and 'enddate' in request.json:
+        startdate = request.json['startdate']
+        enddate = request.json['enddate']
+        response=ResponseTable.scan()
+        result={}
+        result['Items']=[]
+        count=0
+        for k,row in enumerate(response['Items']):
+            date =  row['Date']
+            olddate = date.split(",")
+            if olddate[0] >= startdate and olddate[0] <= enddate:
+                count+=1
+                
+                result['Items'].append(row)
+        result['Count']=count
+        
+        return jsonify(result)
+    else:
+        response=ResponseTable.scan()
+        return jsonify(response)
+        
 
 
 if __name__ == "__main__":
