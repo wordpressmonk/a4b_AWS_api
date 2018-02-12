@@ -390,9 +390,11 @@ def get_devices():
 @app.route("/a4b/api/v1.0/update_device",methods=['POST'])
 @handle_stripe
 def update_device():
-		DeviceName_old = request.json['DeviceName_Old']
+		#DeviceName_old = request.json['DeviceName_Old']
+		Serial_Number = request.json['Serial_Number']
 		DeviceName_new = request.json['DeviceName_New']
-		DeviceArn = get_device_arn(DeviceName_old)
+		#DeviceArn = get_device_arn(DeviceName_old)
+		DeviceArn = get_device_arn_by_serialNo(Serial_Number)
 		response = client_a4b.update_device(
 			DeviceArn=DeviceArn,
 			DeviceName=DeviceName_new
@@ -414,6 +416,17 @@ def get_device_arn(DeviceName):
 			]
 	)
 	return response['Devices'][0]['DeviceArn']
+    
+def get_device_arn_by_serialNo(serialno):
+	response = client_a4b.search_devices(
+	Filters=[
+        {
+            'Key':'DeviceSerialNumber', 
+			'Values':[serialno]
+        }
+			]
+	)
+	return response['Devices'][0]['DeviceArn']    
 
 @app.route("/a4b/api/v1.0/add_room_to_device",methods=['POST'])
 @handle_stripe
