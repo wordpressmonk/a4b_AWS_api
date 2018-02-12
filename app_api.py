@@ -265,18 +265,18 @@ def add_rooms():
 
 	
 @app.route("/a4b/api/v1.0/get_room_arn",methods=['POST'])
-#def get_room_arn(RoomName):
-def get_room_arn():
+def get_room_arn(RoomName):
+#def get_room_arn():
 	response_parn= client_a4b.search_rooms(
     Filters=[
         {
             'Key':'RoomName', 
-			#'Values':[RoomName]
-			'Values':[request.json['RoomName']]
+			'Values':[RoomName]
+			#'Values':[request.json['RoomName']]
         }
 			])
-	#return response_parn['Rooms'][0]['RoomArn']
-	return jsonify(response_parn['Rooms'])
+	return response_parn['Rooms'][0]['RoomArn']
+	#return jsonify(response_parn['Rooms'])
 	
 		
 @app.route("/a4b/api/v1.0/update_rooms",methods=['POST'])
