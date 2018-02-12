@@ -360,13 +360,13 @@ def get_rooms():
 @app.route("/a4b/api/v1.0/get_devices",methods=['POST'])
 @handle_stripe
 def get_devices():
-        if 'DeviceName' in request.json:
-            DeviceName=request.json['DeviceName']
+        if 'Serial_number' in request.json:
+            Serial_number=request.json['Serial_number']
             response = client_a4b.search_devices(
             Filters=[
             {
-                'Key':'DeviceName', 
-                'Values':[DeviceName]
+                'Key':'DeviceSerialNumber', 
+                'Values':[Serial_number]
             }
             ]
             )
