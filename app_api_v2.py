@@ -589,6 +589,11 @@ def scan_response():
 	
 	return jsonify(response)
 
+# @app.route("/a4b/api/v1.0/get_root",methods=['GET'])
+# def get_root():
+	# response=client_iam.get_user(
+		# )
+	# return jsonify(response)
 
 if __name__ == "__main__":
 	#app.run(debug=True)
