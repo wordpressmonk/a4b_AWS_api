@@ -4,6 +4,7 @@ from config import *
 from functools import wraps
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key, Attr
+import time
 
 client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
 client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
@@ -264,18 +265,18 @@ def add_rooms():
 
 	
 @app.route("/a4b/api/v1.0/get_room_arn",methods=['POST'])
-#def get_room_arn(RoomName):
-def get_room_arn():
+def get_room_arn(RoomName):
+#def get_room_arn():
 	response_parn= client_a4b.search_rooms(
     Filters=[
         {
             'Key':'RoomName', 
-			#'Values':[RoomName]
-			'Values':[request.json['RoomName']]
+			'Values':[RoomName]
+			#'Values':[request.json['RoomName']]
         }
 			])
-	#return response_parn['Rooms'][0]['RoomArn']
-	return jsonify(response_parn['Rooms'])
+	return response_parn['Rooms'][0]['RoomArn']
+	#return jsonify(response_parn['Rooms'])
 	
 		
 @app.route("/a4b/api/v1.0/update_rooms",methods=['POST'])
@@ -359,13 +360,13 @@ def get_rooms():
 @app.route("/a4b/api/v1.0/get_devices",methods=['POST'])
 @handle_stripe
 def get_devices():
-        if 'DeviceName' in request.json:
-            DeviceName=request.json['DeviceName']
+        if 'Serial_number' in request.json:
+            Serial_number=request.json['Serial_number']
             response = client_a4b.search_devices(
             Filters=[
             {
-                'Key':'DeviceName', 
-                'Values':[DeviceName]
+                'Key':'DeviceSerialNumber', 
+                'Values':[Serial_number]
             }
             ]
             )
@@ -375,11 +376,11 @@ def get_devices():
         DeviceList = []
         for device in devices:
             DeviceDict={}
-            DeviceDict['DeviceName']=device['DeviceName']
-            DeviceDict['DeviceSerialNumber']=device['DeviceSerialNumber']
-            DeviceDict['DeviceType']=device['DeviceType']
-            DeviceDict['DeviceStatus']=device['DeviceStatus']
-            DeviceDict['DeviceName']=device['DeviceName']
+            DeviceDict['DeviceName']=device['DeviceName'] if 'DeviceName' in device else ''
+            DeviceDict['DeviceSerialNumber']=device['DeviceSerialNumber'] if 'DeviceSerialNumber' in device else ''
+            DeviceDict['DeviceType']=device['DeviceType'] if 'DeviceType' in device else ''
+            DeviceDict['DeviceStatus']=device['DeviceStatus'] if 'DeviceStatus' in device else ''
+            DeviceDict['DeviceName']=device['DeviceName'] if 'DeviceName' in device else ''
             if "RoomName" in device.keys(): # condition to check if devices are associated with any rooms
                 DeviceDict['RoomName'] = device['RoomName']	
             DeviceList.append(DeviceDict)
@@ -389,9 +390,11 @@ def get_devices():
 @app.route("/a4b/api/v1.0/update_device",methods=['POST'])
 @handle_stripe
 def update_device():
-		DeviceName_old = request.json['DeviceName_Old']
+		#DeviceName_old = request.json['DeviceName_Old']
+		Serial_Number = request.json['Serial_Number']
 		DeviceName_new = request.json['DeviceName_New']
-		DeviceArn = get_device_arn(DeviceName_old)
+		#DeviceArn = get_device_arn(DeviceName_old)
+		DeviceArn = get_device_arn_by_serialNo(Serial_Number)
 		response = client_a4b.update_device(
 			DeviceArn=DeviceArn,
 			DeviceName=DeviceName_new
@@ -413,6 +416,17 @@ def get_device_arn(DeviceName):
 			]
 	)
 	return response['Devices'][0]['DeviceArn']
+    
+def get_device_arn_by_serialNo(serialno):
+	response = client_a4b.search_devices(
+	Filters=[
+        {
+            'Key':'DeviceSerialNumber', 
+			'Values':[serialno]
+        }
+			]
+	)
+	return response['Devices'][0]['DeviceArn']    
 
 @app.route("/a4b/api/v1.0/add_room_to_device",methods=['POST'])
 @handle_stripe
@@ -492,7 +506,7 @@ def requests_insert():
 		OtherDetails['Status']=request.json["Status"].lower()
 		OtherDetails['RequestType']=request.json["RequestType"]
 		OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
-		OtherDetails['Conversation']=request.json["Conversation"]
+		OtherDetails['Conversation']=str(request.json["Conversation"])
 		
 		if "Check_Email" in request.json and request.json["Check_Email"]== "1":
 			OtherDetails['EmailID']=request.json["EmailID"]
@@ -583,11 +597,29 @@ def put_response():
 	})
 	return jsonify(response)
 	
-@app.route("/a4b/api/v1.0/scan_response",methods=['GET'])
-def scan_response():	
-	response=ResponseTable.scan()
-	
-	return jsonify(response)
+@app.route("/a4b/api/v1.0/scan_response",methods=['POST'])
+def scan_response():    
+    if 'startdate' in request.json and 'enddate' in request.json:
+        startdate = request.json['startdate']
+        enddate = request.json['enddate']
+        response=ResponseTable.scan()
+        result={}
+        result['Items']=[]
+        count=0
+        for k,row in enumerate(response['Items']):
+            date =  row['Date']
+            olddate = date.split(",")
+            if olddate[0] >= startdate and olddate[0] <= enddate:
+                count+=1
+                
+                result['Items'].append(row)
+        result['Count']=count
+        
+        return jsonify(result)
+    else:
+        response=ResponseTable.scan()
+        return jsonify(response)
+        
 
 # @app.route("/a4b/api/v1.0/get_root",methods=['GET'])
 # def get_root():
