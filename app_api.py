@@ -13,6 +13,8 @@ client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,
 table=client_dynamodb.Table('IamUser')
 requests_table=client_dynamodb.Table('Requests')
 ResponseTable=client_dynamodb.Table('Response')
+Request_TemplateTable=client_dynamodb.Table('Request_Template')
+Notification_TemplateTable=client_dynamodb.Table('Notification_Template')
 
 app=Flask(__name__)
 
@@ -620,8 +622,107 @@ def scan_response():
         response=ResponseTable.scan()
         return jsonify(response)
         
+@app.route("/a4b/api/v1.0/add_request_template",methods=['POST'])
+def add_request_template():
+    if 'template_name' in request.json:
+        template_name = request.json['template_name']
+        template      = request.json['template']
+        response=Request_TemplateTable.put_item(
+        Item={
+            'template_name':template_name,
+            'template':template
+        })
+        return jsonify(response)
+    else:
+        return jsonify({'error':'No Request Templates in the request'})
+        
+        
+@app.route("/a4b/api/v1.0/get_request_template",methods=['POST'])
+def get_request_template():
+    if request.json['template_name']:
+        template_name = request.json['template_name']
+        filter_expression = Key('template_name').eq(template_name)
+        response=Request_TemplateTable.scan(
+            FilterExpression=filter_expression
+        )
+        return jsonify(response)
+    else:
+        response=Request_TemplateTable.scan()
+        return jsonify(response)
 
+@app.route("/a4b/api/v1.0/update_request_template",methods=['POST'])
+def update_request_template():   
+    template_name = request.json['old_template_name']
+    response = Request_TemplateTable.delete_item(
+        Key={
+            'template_name': template_name
+        }
+    )
+    #return jsonify(response)
+    if 'template_name' in request.json:
+        template_name = request.json['template_name']
+        template      = request.json['template']
+        response=Request_TemplateTable.put_item(
+        Item={
+            'template_name':template_name,
+            'template':template
+        })
+        return jsonify(response)
+    else:
+        return jsonify({'error':'No Request Templates in the request'})
+        
+@app.route("/a4b/api/v1.0/add_notification_template",methods=['POST'])
+def add_notification_template():
+    if 'template_name' in request.json:
+        template_name = request.json['template_name']
+        template      = request.json['template']
+        response=Notification_TemplateTable.put_item(
+        Item={
+            'template_name':template_name,
+            'template':template
+        })
+        return jsonify(response)
+    else:
+        return jsonify({'error':'No Notification Templates in the request'})
+        
+        
+@app.route("/a4b/api/v1.0/get_notification_template",methods=['POST'])
+def get_notification_template():
+    if request.json['template_name']:
+        template_name = request.json['template_name']
+        filter_expression = Key('template_name').eq(template_name)
+        response=Notification_TemplateTable.scan(
+            FilterExpression=filter_expression
+        )
+        return jsonify(response)
+    else:
+        response=Notification_TemplateTable.scan()
+        if response:
+            return jsonify(response)
+        else:
+            return jsonify({'error':'No Result Found'})
 
+@app.route("/a4b/api/v1.0/update_notification_template",methods=['POST'])
+def update_notification_template():   
+    template_name = request.json['old_template_name']
+    response = Notification_TemplateTable.delete_item(
+        Key={
+            'template_name': template_name
+        }
+    )
+    #return jsonify(response)
+    if 'template_name' in request.json:
+        template_name = request.json['template_name']
+        template      = request.json['template']
+        response=Notification_TemplateTable.put_item(
+        Item={
+            'template_name':template_name,
+            'template':template
+        })
+        return jsonify(response)
+    else:
+        return jsonify({'error':'No Notification Templates in the request'})        
+        
 if __name__ == "__main__":
 	#app.run(debug=True)
     app.debug = True
