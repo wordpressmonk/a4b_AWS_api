@@ -675,6 +675,18 @@ def update_request_template():
     else:
         return jsonify({'error':'No Request Templates in the request'})
         
+@app.route("/a4b/api/v1.0/request_temp_delete",methods=['POST'])
+def request_temp_delete():
+	Request_Temp_List=request.json['Request_Temp']
+	for Template in Request_Temp_List:	
+		response = Request_TemplateTable.delete_item(
+            Key={
+                'template_name': Template
+            }
+        )
+		
+	return jsonify(response)            
+        
 @app.route("/a4b/api/v1.0/add_notification_template",methods=['POST'])
 def add_notification_template():
     if 'template_name' in request.json:
@@ -726,7 +738,19 @@ def update_notification_template():
         return jsonify(response)
     else:
         return jsonify({'error':'No Notification Templates in the request'})        
-        
+
+@app.route("/a4b/api/v1.0/notification_temp_delete",methods=['POST'])
+def notification_temp_delete():
+	Notification_Temp_List=request.json['Notification_Temp']
+	for Template in Notification_Temp_List:	
+		response = Notification_TemplateTable.delete_item(
+            Key={
+                'template_name': Template
+            }
+        )
+		
+	return jsonify(response)
+    
 if __name__ == "__main__":
 	#app.run(debug=True)
     app.debug = True
