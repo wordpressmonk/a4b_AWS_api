@@ -13,7 +13,7 @@ client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,
 table=client_dynamodb.Table('IamUser')
 requests_table=client_dynamodb.Table('Requests')
 ResponseTable=client_dynamodb.Table('Response')
-Request_TemplateTable=client_dynamodb.Table('Request_Template')
+Request_TypeTable=client_dynamodb.Table('Request_Types')
 Notification_TemplateTable=client_dynamodb.Table('Notification_Template')
 
 app=Flask(__name__)
@@ -626,62 +626,58 @@ def scan_response():
         response=ResponseTable.scan()
         return jsonify(response)
         
-@app.route("/a4b/api/v1.0/add_request_template",methods=['POST'])
+@app.route("/a4b/api/v1.0/add_request_types",methods=['POST'])
 def add_request_template():
-    if 'template_name' in request.json:
-        template_name = request.json['template_name']
-        template      = request.json['template']
-        response=Request_TemplateTable.put_item(
+    if 'request_type' in request.json:
+        request_type = request.json['request_type']
+        response=Request_TypeTable.put_item(
         Item={
-            'template_name':template_name,
-            'template':template
+            'request_type':request_type
         })
         return jsonify(response)
     else:
-        return jsonify({'error':'No Request Templates in the request'})
+        return jsonify({'error':'No Request Type in the request'})
         
         
-@app.route("/a4b/api/v1.0/get_request_template",methods=['POST'])
+@app.route("/a4b/api/v1.0/get_request_types",methods=['POST'])
 def get_request_template():
-    if request.json['template_name']:
-        template_name = request.json['template_name']
-        filter_expression = Key('template_name').eq(template_name)
-        response=Request_TemplateTable.scan(
+    if request.json['request_type']:
+        request_type = request.json['request_type']
+        filter_expression = Key('request_type').eq(request_type)
+        response=Request_TypeTable.scan(
             FilterExpression=filter_expression
         )
         return jsonify(response)
     else:
-        response=Request_TemplateTable.scan()
+        response=Request_TypeTable.scan()
         return jsonify(response)
 
-@app.route("/a4b/api/v1.0/update_request_template",methods=['POST'])
+@app.route("/a4b/api/v1.0/update_request_type",methods=['POST'])
 def update_request_template():   
-    template_name = request.json['old_template_name']
-    response = Request_TemplateTable.delete_item(
+    request_type = request.json['old_request_type']
+    response = Request_TypeTable.delete_item(
         Key={
-            'template_name': template_name
+            'request_type': request_type
         }
     )
     #return jsonify(response)
-    if 'template_name' in request.json:
-        template_name = request.json['template_name']
-        template      = request.json['template']
-        response=Request_TemplateTable.put_item(
+    if 'request_type' in request.json:
+        request_type = request.json['request_type']
+        response=Request_TypeTable.put_item(
         Item={
-            'template_name':template_name,
-            'template':template
+            'request_type':request_type
         })
         return jsonify(response)
     else:
         return jsonify({'error':'No Request Templates in the request'})
         
-@app.route("/a4b/api/v1.0/request_temp_delete",methods=['POST'])
+@app.route("/a4b/api/v1.0/request_type_delete",methods=['POST'])
 def request_temp_delete():
-	Request_Temp_List=request.json['Request_Temp']
-	for Template in Request_Temp_List:	
-		response = Request_TemplateTable.delete_item(
+	Request_Type_List=request.json['request_type']
+	for request_type in Request_Type_List:	
+		response = Request_TypeTable.delete_item(
             Key={
-                'template_name': Template
+                'request_type': request_type
             }
         )
 		
