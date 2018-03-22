@@ -255,12 +255,12 @@ def delete_room_profile():
 @app.route("/a4b/api/v1.0/add_rooms",methods=['POST'])
 #@handle_stripe
 def add_rooms():
-	#user_a4b=create_client()
-	#get profile arn from profile name
+    #user_a4b=create_client()
+    #get profile arn from profile name
 	
-	ProfileName=request.json['ProfileName']
-	ProfileArn=get_profile_arn(ProfileName)
-	try:
+    ProfileName=request.json['ProfileName']
+    ProfileArn=get_profile_arn(ProfileName)
+    try:
         response = client_a4b.create_room(
         RoomName=request.json['RoomName'],
         ProfileArn=ProfileArn)
@@ -287,27 +287,29 @@ def get_room_arn(RoomName):
 	
 		
 @app.route("/a4b/api/v1.0/update_rooms",methods=['POST'])
-@handle_stripe
+#@handle_stripe
 def update_rooms():
-	#client_a4b=create_client()
-	
-	#get roomarn from roomname
-	RoomName=request.json['RoomName']
-	RoomArn=get_room_arn(RoomName)
-	
-	#get profile arn from profile name
-	ProfileName=request.json['ProfileName']
-	ProfileArn=get_profile_arn(ProfileName)
-	
-	#call update room only for changing room profile
-	response= client_a4b.update_room(
-    RoomArn=RoomArn,
-    #RoomName=request.json['RoomName'],
-    #Description=request.json['Description'],
-    #ProviderCalendarId=request.json['ProviderCalendarId'],
-    ProfileArn=ProfileArn)
-	
-	return jsonify(response)
+    try:
+        #client_a4b=create_client()
+        #get roomarn from roomname
+        RoomName=request.json['RoomName']
+        RoomArn=get_room_arn(RoomName)
+        
+        #get profile arn from profile name
+        ProfileName=request.json['ProfileName']
+        ProfileArn=get_profile_arn(ProfileName)
+        
+        #call update room only for changing room profile
+        response= client_a4b.update_room(
+        RoomArn=RoomArn,
+        #RoomName=request.json['RoomName'],
+        #Description=request.json['Description'],
+        #ProviderCalendarId=request.json['ProviderCalendarId'],
+        ProfileArn=ProfileArn)
+        
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({'error':str(e)})
 	
 @app.route("/a4b/api/v1.0/delete_rooms",methods=['POST'])
 @handle_stripe
