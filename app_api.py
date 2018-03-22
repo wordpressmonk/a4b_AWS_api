@@ -172,7 +172,12 @@ def add_room_profile():
 @app.route("/a4b/api/v1.0/list_room_profile", methods=['GET'])
 @handle_stripe
 def list_room_profile():
-	response = client_a4b.search_profiles()
+	response = client_a4b.search_profiles(SortCriteria=[
+        {
+            'Key': 'ProfileName',
+            'Value': 'ASC'
+        },
+    ])
 	profiles=response['Profiles']
 	ProfileNameList=[]
 	for profile in profiles:
@@ -337,6 +342,12 @@ def get_rooms():
             'Key':'RoomName', 
             'Values':[RoomName]
         }
+        ],
+        SortCriteria=[
+            {
+                'Key': 'RoomName',
+                'Value': 'ASC'
+            },
         ]
         )
     else:
