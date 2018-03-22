@@ -162,9 +162,9 @@ def add_room_profile():
 	SetupModeDisabled=bool(request.json['SetupModeDisabled']),
 	MaxVolumeLimit=int(request.json['MaxVolumeLimit']),
 	PSTNEnabled=bool(request.json['PSTNEnabled']))
-	#return jsonify(response)
+	return jsonify(response)
 	#return ("Room Profile Added")
-	return jsonify({'profile_list':list_room_profile()})
+	#return jsonify({'profile_list':list_room_profile()})
 	
 @app.route("/a4b/api/v1.0/list_room_profile", methods=['GET'])
 @handle_stripe
