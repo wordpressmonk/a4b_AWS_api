@@ -148,7 +148,7 @@ def add_skill_group():
 #
 	
 @app.route("/a4b/api/v1.0/add_room_profile", methods=['POST'])
-@handle_stripe
+#@handle_stripe
 def add_room_profile():
     try:
         #user_a4b=create_client()#when login page is provided pass username from login page
