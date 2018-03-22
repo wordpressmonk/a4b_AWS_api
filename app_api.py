@@ -353,7 +353,12 @@ def get_rooms():
         ]
         )
     else:
-        response = client_a4b.search_rooms()
+        response = client_a4b.search_rooms(SortCriteria=[
+            {
+                'Key': 'RoomName',
+                'Value': 'ASC'
+            },
+        ])
 
     DeviceDict = list_devices_with_rooms()
     rooms=response['Rooms']
