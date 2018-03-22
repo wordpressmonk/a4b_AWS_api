@@ -150,21 +150,25 @@ def add_skill_group():
 @app.route("/a4b/api/v1.0/add_room_profile", methods=['POST'])
 @handle_stripe
 def add_room_profile():
-	#user_a4b=create_client()#when login page is provided pass username from login page
-	response = client_a4b.create_profile(
-	ProfileName=request.json['ProfileName'],
-	Timezone=request.json['Timezone'],
-	Address=request.json['Address'],
-	DistanceUnit=request.json['DistanceUnit'],
-	TemperatureUnit=request.json['TemperatureUnit'],
-	WakeWord=request.json['WakeWord'],
-	#ClientRequestToken=request.json['ClientRequestToken'],
-	SetupModeDisabled=bool(request.json['SetupModeDisabled']),
-	MaxVolumeLimit=int(request.json['MaxVolumeLimit']),
-	PSTNEnabled=bool(request.json['PSTNEnabled']))
-	#return jsonify(response)
-	#return ("Room Profile Added")
-	return list_room_profile()
+    try:
+        #user_a4b=create_client()#when login page is provided pass username from login page
+        response = client_a4b.create_profile(
+        ProfileName=request.json['ProfileName'],
+        Timezone=request.json['Timezone'],
+        Address=request.json['Address'],
+        DistanceUnit=request.json['DistanceUnit'],
+        TemperatureUnit=request.json['TemperatureUnit'],
+        WakeWord=request.json['WakeWord'],
+        #ClientRequestToken=request.json['ClientRequestToken'],
+        SetupModeDisabled=bool(request.json['SetupModeDisabled']),
+        MaxVolumeLimit=int(request.json['MaxVolumeLimit']),
+        PSTNEnabled=bool(request.json['PSTNEnabled']))
+        #return jsonify(response)
+        #return ("Room Profile Added")
+    except Exception as e:
+        return jsonify({'error':e})
+    else:    
+        return jsonify({'profile_list':list_room_profile()})
 	
 @app.route("/a4b/api/v1.0/list_room_profile", methods=['GET'])
 @handle_stripe
