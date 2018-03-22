@@ -253,20 +253,22 @@ def delete_room_profile():
 #
 	
 @app.route("/a4b/api/v1.0/add_rooms",methods=['POST'])
-@handle_stripe
+#@handle_stripe
 def add_rooms():
 	#user_a4b=create_client()
 	#get profile arn from profile name
 	
 	ProfileName=request.json['ProfileName']
 	ProfileArn=get_profile_arn(ProfileName)
-	
-	response = client_a4b.create_room(
-	RoomName=request.json['RoomName'],
-	ProfileArn=ProfileArn)
-	
-	#return (response['RoomArn'])
-	return associate_device_room(response['RoomArn'],request.json['DeviceName'])
+	try:
+        response = client_a4b.create_room(
+        RoomName=request.json['RoomName'],
+        ProfileArn=ProfileArn)
+        
+        #return (response['RoomArn'])
+        return associate_device_room(response['RoomArn'],request.json['DeviceName'])
+    except Exception as e:
+        return jsonify({'error':str(e)})
 
 	
 @app.route("/a4b/api/v1.0/get_room_arn",methods=['POST'])
