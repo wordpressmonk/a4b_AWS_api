@@ -214,12 +214,12 @@ def get_profile_arn(ProfileName):
 @app.route("/a4b/api/v1.0/update_room_profile", methods=['POST'])
 @handle_stripe	
 def update_room_profile():
-	ProfileName=request.json['ProfileName']
+	ProfileName=request.json['OldProfileName']
 	ProfileArn=get_profile_arn(ProfileName)
-	
+	#return jsonify(ProfileArn)
 	response = client_a4b.update_profile(
     ProfileArn=ProfileArn,
-	ProfileName=request.json['NewProfileName'],
+	ProfileName=request.json['ProfileName'],
 	Timezone=request.json['Timezone'],
 	Address=request.json['Address'],
 	DistanceUnit=request.json['DistanceUnit'],
