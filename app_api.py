@@ -315,7 +315,8 @@ def update_rooms():
         #ProviderCalendarId=request.json['ProviderCalendarId'],
         ProfileArn=ProfileArn)
         
-        associate_device_room(RoomArn,request.json['DeviceName'])
+        if(request.json['DeviceName'])
+            associate_device_room(RoomArn,request.json['DeviceName'])
         
         return jsonify(response)
     except Exception as e:
