@@ -318,7 +318,7 @@ def update_rooms():
         if request.json['DeviceName']:
             associate_device_room(RoomArn,request.json['DeviceName'])
         else:
-            disassociate_device_from_room(request.json['DeviceName'])
+            disassociate_device_from_room(request.json['OldDeviceName'])
         
         return jsonify(response)
     except Exception as e:
