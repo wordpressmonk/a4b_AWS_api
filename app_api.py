@@ -317,6 +317,8 @@ def update_rooms():
         
         if request.json['DeviceName']:
             associate_device_room(RoomArn,request.json['DeviceName'])
+        else:
+            disassociate_device_from_room(request.json['DeviceName'])
         
         return jsonify(response)
     except Exception as e:
@@ -509,8 +511,11 @@ def start_device_sync():
 
 @app.route("/a4b/api/v1.0/disassociate_device_from_room",methods=['POST'])
 @handle_stripe
-def disassociate_device_from_room():
-    DeviceName=request.json['DeviceName']
+def disassociate_device_from_room(devicename=''):
+    if request.json['DeviceName']:
+        DeviceName=request.json['DeviceName']
+    else:
+        DeviceName=devicename
     DeviceArn = get_device_arn(DeviceName)
     response = client_a4b.disassociate_device_from_room(
         DeviceArn=DeviceArn
