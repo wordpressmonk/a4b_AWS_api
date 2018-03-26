@@ -262,7 +262,7 @@ def delete_room_profile():
     for ProfileName in ProfileNameList:
         ProfileArn=get_profile_arn(ProfileName)
         
-        response = Room_Profile.delete_profile(
+        response = Room_Profile.delete_item(
             Key={
                     'profile_arn': ProfileArn
                 }
