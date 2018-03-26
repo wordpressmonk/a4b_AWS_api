@@ -16,26 +16,6 @@ ResponseTable=client_dynamodb.Table('Response')
 Request_TypeTable=client_dynamodb.Table('Request_Types')
 Notification_TemplateTable=client_dynamodb.Table('Notification_Template')
 
-
-def change_user(username,table):
-    iamuser = table.get_item(
-    Key={
-        'UserName':username
-    })
-    aws_access_key_id = iamuser['Item']['aws_access_key_id']
-    aws_secret_access_key = iamuser['Item']['aws_secret_access_key']
-        
-    client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
-    client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
-    client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
-    
-    table=client_dynamodb.Table('IamUser')
-    requests_table=client_dynamodb.Table('Requests')
-    ResponseTable=client_dynamodb.Table('Response')
-    Request_TypeTable=client_dynamodb.Table('Request_Types')
-    Notification_TemplateTable=client_dynamodb.Table('Notification_Template')
-
-
 app=Flask(__name__)
 
 # def create_a4b_client():
@@ -189,24 +169,20 @@ def add_room_profile():
     except Exception as e:
         return jsonify({'error':str(e)})
 	
-@app.route("/a4b/api/v1.0/list_room_profile", methods=['GET','POST'])
-#@handle_stripe
+@app.route("/a4b/api/v1.0/list_room_profile", methods=['GET'])
+@handle_stripe
 def list_room_profile():
-    if 'username' in request.json:
-        if request.json['username']:
-            change_user(request.json['username'],table)
-        
-    response = client_a4b.search_profiles(SortCriteria=[
+	response = client_a4b.search_profiles(SortCriteria=[
         {
             'Key': 'ProfileName',
             'Value': 'ASC'
         },
     ])
-    profiles=response['Profiles']
-    ProfileNameList=[]
-    for profile in profiles:
-        ProfileNameList.append(profile['ProfileName'])
-    return jsonify(ProfileNameList)
+	profiles=response['Profiles']
+	ProfileNameList=[]
+	for profile in profiles:
+		ProfileNameList.append(profile['ProfileName'])
+	return jsonify(ProfileNameList)
 	
 	
 @app.route("/a4b/api/v1.0/get_room_profile_info", methods=['POST'])
