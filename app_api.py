@@ -15,7 +15,8 @@ requests_table=client_dynamodb.Table('Requests')
 ResponseTable=client_dynamodb.Table('Response')
 Request_TypeTable=client_dynamodb.Table('Request_Types')
 Notification_TemplateTable=client_dynamodb.Table('Notification_Template')
-Room_Profile = client_dynamodb.Table('Room_Profile')
+Room_Profile = client_dynamodb.Table('Room_Profiles_By')
+Rooms_By     = client_dynamodb.Table('Rooms_By')
 
 app=Flask(__name__)
 
@@ -289,6 +290,12 @@ def add_rooms():
         RoomName=request.json['RoomName'],
         ProfileArn=ProfileArn)
         
+        response_table=Rooms_By.put_item(
+        Item={
+            'room_arn':response['RoomArn'],
+            'username':request.json['username']
+        })
+        
         #return (response['RoomArn'])
         if request.json['DeviceName']:
             return associate_device_room(response['RoomArn'],request.json['DeviceName'])
@@ -382,23 +389,30 @@ def get_rooms():
                 'Value': 'ASC'
             },
         ])
-
+        
+    room_response = Rooms_By.get_item(
+    Key={
+        'username':username
+    })
+    RoomArn = room_response['Item']['room_arn']
+        
     DeviceDict = list_devices_with_rooms()
     rooms=response['Rooms']
     List_room_info=[]
     # RoomNameList=[]
     # RoomProfileList=[]
     for room in rooms:
-        Roomdict={}
-        Roomdict['RoomName']=room['RoomName']
-        Roomdict['ProfileName']=room['ProfileName']
-        if room['RoomName'] in DeviceDict.keys():
-            Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
-        else:
-            Roomdict['DeviceName'] = ""
-        List_room_info.append(Roomdict)
-        #RoomNameList.append(room['RoomName'])
-        #RoomProfileList.append(room['ProfileName'])
+        if str(RoomArn)==str(room['RoomArn']):
+            Roomdict={}
+            Roomdict['RoomName']    =room['RoomName']
+            Roomdict['ProfileName'] =room['ProfileName']
+            if room['RoomName'] in DeviceDict.keys():
+                Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
+            else:
+                Roomdict['DeviceName'] = ""
+            List_room_info.append(Roomdict)
+            #RoomNameList.append(room['RoomName'])
+            #RoomProfileList.append(room['ProfileName'])
     #List_room_info={"RoomNames":RoomNameList,"ProfileName":RoomProfileList}
     return jsonify(List_room_info)
 	
