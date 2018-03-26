@@ -259,19 +259,19 @@ def update_room_profile():
 @handle_stripe
 def delete_room_profile():
     ProfileNameList=request.json['ProfileName']
-    for OneProfileName in ProfileNameList:
-        ProfileName=OneProfileName
+    for ProfileName in ProfileNameList:
         ProfileArn=get_profile_arn(ProfileName)
-        
-        response = client_a4b.delete_profile(
-            ProfileArn=ProfileArn
-        )
         
         response = Room_Profile.delete_profile(
             Key={
                     'profile_arn': ProfileArn
                 }
         )
+        
+        response = client_a4b.delete_profile(
+            ProfileArn=ProfileArn
+        )
+
         
     # return get_rooms()
     # ProfileName=request.json['ProfileName']
