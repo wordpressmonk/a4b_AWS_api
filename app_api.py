@@ -177,20 +177,28 @@ def add_room_profile():
     except Exception as e:
         return jsonify({'error':str(e)})
 	
-@app.route("/a4b/api/v1.0/list_room_profile", methods=['GET'])
-@handle_stripe
+@app.route("/a4b/api/v1.0/list_room_profile", methods=['GET','POST'])
+#@handle_stripe
 def list_room_profile():
-	response = client_a4b.search_profiles(SortCriteria=[
+    response = client_a4b.search_profiles(SortCriteria=[
         {
             'Key': 'ProfileName',
             'Value': 'ASC'
         },
     ])
-	profiles=response['Profiles']
-	ProfileNameList=[]
-	for profile in profiles:
-		ProfileNameList.append(profile['ProfileName'])
-	return jsonify(ProfileNameList)
+    username = request.json['username']
+    room_profile_response = Room_Profile.get_item(
+    Key={
+        'username':username
+    })
+    #return jsonify(response)
+    ProfileArn =room_profile_response['Item']['profile_arn']
+    profiles=response['Profiles']
+    ProfileNameList=[]
+    for profile in profiles:
+        if str(ProfileArn)==str(profile['ProfileArn']):
+            ProfileNameList.append(profile['ProfileName'])
+    return jsonify(ProfileNameList)
 	
 	
 @app.route("/a4b/api/v1.0/get_room_profile_info", methods=['POST'])
