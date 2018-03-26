@@ -17,7 +17,7 @@ Request_TypeTable=client_dynamodb.Table('Request_Types')
 Notification_TemplateTable=client_dynamodb.Table('Notification_Template')
 
 
-def change_user(username):
+def change_user(username,table):
     iamuser = table.get_item(
     Key={
         'UserName':username
@@ -171,7 +171,6 @@ def add_skill_group():
 #@handle_stripe
 def add_room_profile():
     try:
-        change_user()
         #user_a4b=create_client()#when login page is provided pass username from login page
         response = client_a4b.create_profile(
         ProfileName=request.json['ProfileName'],
@@ -191,11 +190,11 @@ def add_room_profile():
         return jsonify({'error':str(e)})
 	
 @app.route("/a4b/api/v1.0/list_room_profile", methods=['GET','POST'])
-@handle_stripe
+#@handle_stripe
 def list_room_profile():
     if 'username' in request.json:
         if request.json['username']:
-            change_user(request.json['username'])
+            change_user(request.json['username'],table)
         
     response = client_a4b.search_profiles(SortCriteria=[
         {
