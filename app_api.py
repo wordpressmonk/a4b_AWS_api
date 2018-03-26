@@ -258,23 +258,29 @@ def update_room_profile():
 @app.route("/a4b/api/v1.0/delete_room_profile", methods=['POST'])
 @handle_stripe
 def delete_room_profile():
-	ProfileNameList=request.json['ProfileName']
-	for OneProfileName in ProfileNameList:
-		ProfileName=OneProfileName
-		ProfileArn=get_profile_arn(ProfileName)
-		
-		response = client_a4b.delete_profile(
-		ProfileArn=ProfileArn
-	)
-		
-	# return get_rooms()
-	# ProfileName=request.json['ProfileName']
-	# ProfileArn=get_profile_arn(ProfileName)
-	
-	# response = client_a4b.delete_profile(
-		# ProfileArn=ProfileArn
-	# )
-	return list_room_profile()
+    ProfileNameList=request.json['ProfileName']
+    for OneProfileName in ProfileNameList:
+        ProfileName=OneProfileName
+        ProfileArn=get_profile_arn(ProfileName)
+        
+        response = client_a4b.delete_profile(
+            ProfileArn=ProfileArn
+        )
+        
+        response = Room_Profile.delete_profile(
+            Key={
+                    'profile_arn': ProfileArn
+                }
+        )
+        
+    # return get_rooms()
+    # ProfileName=request.json['ProfileName']
+    # ProfileArn=get_profile_arn(ProfileName)
+
+    # response = client_a4b.delete_profile(
+        # ProfileArn=ProfileArn
+    # )
+    return list_room_profile()
 
 #
 #CRUD for rooms
@@ -360,6 +366,11 @@ def delete_rooms():
             RoomArn=get_room_arn(RoomName)
             response = client_a4b.delete_room(
             RoomArn=RoomArn)
+            response = Rooms_By.delete_item(
+                Key={
+                    'room_arn': RoomArn
+                }
+            )
         except Exception as e:  
             pass
     return get_rooms()
