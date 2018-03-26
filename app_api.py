@@ -15,6 +15,7 @@ requests_table=client_dynamodb.Table('Requests')
 ResponseTable=client_dynamodb.Table('Response')
 Request_TypeTable=client_dynamodb.Table('Request_Types')
 Notification_TemplateTable=client_dynamodb.Table('Notification_Template')
+Room_Profile = client_dynamodb.Table('Room_Profile')
 
 app=Flask(__name__)
 
@@ -163,6 +164,13 @@ def add_room_profile():
         SetupModeDisabled=bool(request.json['SetupModeDisabled']),
         MaxVolumeLimit=int(request.json['MaxVolumeLimit']),
         PSTNEnabled=bool(request.json['PSTNEnabled']))
+        
+        response_table=Room_Profile.put_item(
+        Item={
+            'profile_arn':response['ProfileArn'],
+            'username':request.json['username']
+        })
+    
         return jsonify(response)
         #return ("Room Profile Added")
         #return jsonify({'profile_list':list_room_profile()})
