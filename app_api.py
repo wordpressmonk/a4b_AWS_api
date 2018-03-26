@@ -393,11 +393,6 @@ def get_rooms():
         ])
         
     username = request.json['username']
-    room_response = Rooms_By.get_item(
-    Key={
-        'Username':username
-    })
-    RoomArn = room_response['Item']['room_arn']
         
     DeviceDict = list_devices_with_rooms()
     rooms=response['Rooms']
@@ -405,17 +400,23 @@ def get_rooms():
     # RoomNameList=[]
     # RoomProfileList=[]
     for room in rooms:
-        if str(RoomArn)==str(room['RoomArn']):
-            Roomdict={}
-            Roomdict['RoomName']    =room['RoomName']
-            Roomdict['ProfileName'] =room['ProfileName']
-            if room['RoomName'] in DeviceDict.keys():
-                Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
-            else:
-                Roomdict['DeviceName'] = ""
-            List_room_info.append(Roomdict)
-            #RoomNameList.append(room['RoomName'])
-            #RoomProfileList.append(room['ProfileName'])
+        room_response = Rooms_By.get_item(
+        Key={
+            'room_arn':str(room['RoomArn'])
+        })
+        if 'Item' in room_response:
+            Username_R = room_response['Item']['Username']
+            if str(username)==str(Username_R):
+                Roomdict={}
+                Roomdict['RoomName']    =room['RoomName']
+                Roomdict['ProfileName'] =room['ProfileName']
+                if room['RoomName'] in DeviceDict.keys():
+                    Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
+                else:
+                    Roomdict['DeviceName'] = ""
+                List_room_info.append(Roomdict)
+                #RoomNameList.append(room['RoomName'])
+                #RoomProfileList.append(room['ProfileName'])
     #List_room_info={"RoomNames":RoomNameList,"ProfileName":RoomProfileList}
     return jsonify(List_room_info)
 	
