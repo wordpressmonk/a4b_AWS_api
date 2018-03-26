@@ -389,6 +389,7 @@ def get_rooms():
             },
         ])
         
+    username = request.json['username']
     room_response = Rooms_By.get_item(
     Key={
         'Username':username
