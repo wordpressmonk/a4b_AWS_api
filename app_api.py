@@ -326,18 +326,18 @@ def update_rooms():
         return jsonify({'error':str(e)})
 	
 @app.route("/a4b/api/v1.0/delete_rooms",methods=['POST'])
-@handle_stripe
+#@handle_stripe
 def delete_rooms():
-	#get roomarn from roomname
-	RoomNameList=request.json['RoomName']
-	for OneRoomName in RoomNameList:
-		RoomName=OneRoomName
-		RoomArn=get_room_arn(RoomName)
-		
-		response = client_a4b.delete_room(
-		RoomArn=RoomArn)
-		
-	return get_rooms()
+    #get roomarn from roomname
+    RoomNameList=request.json['RoomName']
+    for OneRoomName in RoomNameList:
+        RoomName=OneRoomName
+        RoomArn=get_room_arn(RoomName)
+        
+        response = client_a4b.delete_room(
+        RoomArn=RoomArn)
+        
+    return get_rooms()
 	
 	
 @app.route("/a4b/api/v1.0/get_rooms",methods=['POST'])
