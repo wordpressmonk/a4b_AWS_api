@@ -289,7 +289,6 @@ def add_rooms():
         response = client_a4b.create_room(
         RoomName=request.json['RoomName'],
         ProfileArn=ProfileArn)
-        return jsonify(response)
         response_table=Rooms_By.put_item(
         Item={
             'room_arn':response['RoomArn'],
