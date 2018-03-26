@@ -330,13 +330,13 @@ def update_rooms():
 def delete_rooms():
     #get roomarn from roomname
     RoomNameList=request.json['RoomName']
-    for OneRoomName in RoomNameList:
-        RoomName=OneRoomName
-        RoomArn=get_room_arn(RoomName)
-        
-        response = client_a4b.delete_room(
-        RoomArn=RoomArn)
-        
+    for RoomName in RoomNameList:
+        try:
+            RoomArn=get_room_arn(RoomName)
+            response = client_a4b.delete_room(
+            RoomArn=RoomArn)
+        except Exception as e:  
+            pass
     return get_rooms()
 	
 	
