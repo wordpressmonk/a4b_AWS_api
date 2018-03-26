@@ -289,11 +289,11 @@ def add_rooms():
         response = client_a4b.create_room(
         RoomName=request.json['RoomName'],
         ProfileArn=ProfileArn)
-        
+        return jsonify(response)
         response_table=Rooms_By.put_item(
         Item={
             'room_arn':response['RoomArn'],
-            'username':request.json['username']
+            'Username':request.json['username']
         })
         
         #return (response['RoomArn'])
@@ -392,7 +392,7 @@ def get_rooms():
         
     room_response = Rooms_By.get_item(
     Key={
-        'username':username
+        'Username':username
     })
     RoomArn = room_response['Item']['room_arn']
         
