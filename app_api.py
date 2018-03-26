@@ -188,17 +188,20 @@ def list_room_profile():
         },
     ])
     username = request.json['username']
-    room_profile_response = Room_Profile.get_item(
-    Key={
-        'username':username
-    })
+    
     #return jsonify(response)
-    ProfileArn =room_profile_response['Item']['profile_arn']
+    
     profiles=response['Profiles']
     ProfileNameList=[]
     for profile in profiles:
-        if str(ProfileArn)==str(profile['ProfileArn']):
-            ProfileNameList.append(profile['ProfileName'])
+        room_profile_response = Room_Profile.get_item(
+        Key={
+            'profile_arn':str(profile['ProfileArn'])
+        })
+        if 'Item' in room_profile_response:
+            Username_RP =room_profile_response['Item']['username']
+            if str(username)==str(Username_RP):
+                ProfileNameList.append(profile['ProfileName'])
     return jsonify(ProfileNameList)
 	
 	
