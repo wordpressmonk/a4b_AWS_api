@@ -635,8 +635,9 @@ def requests_insert():
 @app.route("/a4b/api/v1.0/request_info",methods=['POST'])	
 def request_info():
 # For particular request
+    request_name = str(request.json['userid'])+'_@_'+str(request.json['request_name'])
 	response = requests_table.query(
-		KeyConditionExpression=Key('request_name').eq(request.json['request_name'])
+		KeyConditionExpression=Key('request_name').eq(request_name)
 		)
 	conversation = 	response['Items'][0]['Conversation']
 	del response['Items'][0]['Conversation']
