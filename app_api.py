@@ -256,21 +256,27 @@ def update_room_profile():
         return jsonify({'error':str(e)})    
 
 @app.route("/a4b/api/v1.0/delete_room_profile", methods=['POST'])
-@handle_stripe
+#@handle_stripe
 def delete_room_profile():
-    ProfileNameList=request.json['ProfileName']
-    for ProfileName in ProfileNameList:
-        ProfileArn=get_profile_arn(ProfileName)
-        #print(ProfileArn)
-        response = Room_Profile.delete_item(
-            Key={
-                    'profile_arn': ProfileArn
-                }
-        )
-        
-        response = client_a4b.delete_profile(
-            ProfileArn=ProfileArn
-        )
+    try:
+        ProfileNameList=request.json['ProfileName']
+        for ProfileName in ProfileNameList:
+            try:
+                ProfileArn=get_profile_arn(ProfileName)
+                #print(ProfileArn)
+                response = Room_Profile.delete_item(
+                    Key={
+                            'profile_arn': ProfileArn
+                        }
+                )
+                
+                response = client_a4b.delete_profile(
+                    ProfileArn=ProfileArn
+                )
+            except Exception as e:
+                pass
+    except Exception as e:
+        pass 
 
         
     # return get_rooms()
