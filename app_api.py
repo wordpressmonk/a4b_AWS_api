@@ -583,46 +583,47 @@ def disassociate_device_from_room(devicename=''):
 @app.route("/a4b/api/v1.0/requests_insert",methods=['POST'])
 def requests_insert():
 
-	#to verify if the request is duplicate
-	response=requests_table.query(
-		KeyConditionExpression=Key('request_name').eq(request.json['request_name'].lower())
-		)
-	request_exist=response['Items']
-	if not request_exist:
-		#if the request_name not in dynamodb, then create the request
-		OtherDetails={}
-		OtherDetails['request_name'] = request.json['request_name'].lower()
-		OtherDetails['Status']=request.json["Status"].lower()
-		OtherDetails['RequestType']=request.json["RequestType"]
-		OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
-		OtherDetails['Conversation']=str(request.json["Conversation"])
-		
-		if "Check_Email" in request.json and request.json["Check_Email"]== "1":
-			OtherDetails['EmailID']=request.json["EmailID"]
-			
-		if "Check_Text" in request.json and request.json["Check_Text"]== "1":
-			OtherDetails['TextNumber']=request.json["TextNumber"]
-			
-		if "Check_Call" in request.json and request.json["Check_Call"]== "1":
-			OtherDetails['CallNumber']=request.json["CallNumber"]
-			
-		
-		#Level=int(request.json["Level"])
-		# OtherDetails['Level']=request.json["Level"]
-		# for i in range(Level):
-			# Q = request.json["Q"+str(i+1)]
-			# A = request.json["A"+str(i+1)]
-			
-			# OtherDetails["Q"+str(i+1)]= Q
-			# OtherDetails["A"+str(i+1)]= A
-		
-		response=requests_table.put_item(
-		Item=OtherDetails)
-		
-		#return display_menu()
-		return jsonify(response)
-	else:
-		return("Request already exists. Please delete the request and create request again")
+    #to verify if the request is duplicate
+    response=requests_table.query(
+        KeyConditionExpression=Key('request_name').eq(request.json['request_name'].lower())
+        )
+    request_exist=response['Items']
+    if not request_exist:
+        #if the request_name not in dynamodb, then create the request
+        OtherDetails={}
+        OtherDetails['request_name'] = request.json['request_name'].lower()
+        OtherDetails['Status']=request.json["Status"].lower()
+        OtherDetails['RequestType']=request.json["RequestType"]
+        OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
+        OtherDetails['Conversation']=str(request.json["Conversation"])
+        OtherDetails['username']=str(request.json["username"])
+        
+        if "Check_Email" in request.json and request.json["Check_Email"]== "1":
+            OtherDetails['EmailID']=request.json["EmailID"]
+            
+        if "Check_Text" in request.json and request.json["Check_Text"]== "1":
+            OtherDetails['TextNumber']=request.json["TextNumber"]
+            
+        if "Check_Call" in request.json and request.json["Check_Call"]== "1":
+            OtherDetails['CallNumber']=request.json["CallNumber"]
+            
+        
+        #Level=int(request.json["Level"])
+        # OtherDetails['Level']=request.json["Level"]
+        # for i in range(Level):
+            # Q = request.json["Q"+str(i+1)]
+            # A = request.json["A"+str(i+1)]
+            
+            # OtherDetails["Q"+str(i+1)]= Q
+            # OtherDetails["A"+str(i+1)]= A
+        
+        response=requests_table.put_item(
+        Item=OtherDetails)
+        
+        #return display_menu()
+        return jsonify(response)
+    else:
+        return jsonify({"error":"Request with the name already exists."})
 
 @app.route("/a4b/api/v1.0/request_info",methods=['POST'])	
 def request_info():
@@ -637,11 +638,14 @@ def request_info():
 	return jsonify(response['Items'])
 	#return type(response['Items'])
 
-@app.route("/a4b/api/v1.0/requests_read",methods=['GET'])	
+@app.route("/a4b/api/v1.0/requests_read",methods=['POST'])	
 def requests_read():
 #To get information of all requests in table
-	response = requests_table.scan()
-	return jsonify(response['Items'])
+    filter_expression = Key('username').eq(request.json['username'])
+    response=requests_table.scan(
+        FilterExpression=filter_expression
+    )
+    return jsonify(response['Items'])
 	
 @app.route("/a4b/api/v1.0/requests_delete",methods=['POST'])
 def requests_delete():
