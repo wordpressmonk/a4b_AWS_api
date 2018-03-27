@@ -377,7 +377,7 @@ def delete_rooms():
     for RoomName in RoomNameList:
         try:
             Room_Name = str(request.json['userid'])+'_@_'+str(RoomName)
-            RoomArn=get_room_arn(RoomName)
+            RoomArn=get_room_arn(Room_Name)
             response = client_a4b.delete_room(
             RoomArn=RoomArn)
             response = Rooms_By.delete_item(
@@ -386,8 +386,9 @@ def delete_rooms():
                 }
             )
         except Exception as e:  
-            pass
-    return get_rooms()
+            return str(e)
+    #return get_rooms()
+    return ''
 	
 	
 @app.route("/a4b/api/v1.0/get_rooms",methods=['POST'])
