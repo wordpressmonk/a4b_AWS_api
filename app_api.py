@@ -434,7 +434,7 @@ def get_rooms():
             if str(username)==str(Username_R):
                 Roomdict={}
                 Roomdict['RoomName']    =room['RoomName'].split('_@_')[1]
-                Roomdict['ProfileName'] =room['ProfileName']
+                Roomdict['ProfileName'] =room['ProfileName'].split('_@_')[1]
                 if room['RoomName'] in DeviceDict.keys():
                     Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
                 else:
