@@ -832,10 +832,12 @@ def update_notification_template():
     if 'template_name' in request.json:
         template_name = request.json['template_name']
         template      = request.json['template']
+        username      = request.json['username']
         response=Notification_TemplateTable.put_item(
         Item={
             'template_name':template_name,
-            'template':template
+            'template':template,
+            'username':username
         })
         return jsonify(response)
     else:
