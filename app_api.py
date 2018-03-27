@@ -208,15 +208,17 @@ def list_room_profile():
 	
 	
 @app.route("/a4b/api/v1.0/get_room_profile_info", methods=['POST'])
-@handle_stripe
+#@handle_stripe
 def get_room_profile_info():#ProfileName
-	ProfileName=str(request.json['userid'])+'_@_'+request.json['ProfileName']
-	ProfileArn=get_profile_arn(ProfileName)
-	
-	response_p_info= client_a4b.get_profile(
-		ProfileArn=ProfileArn
-		)
-	return jsonify(response_p_info['Profile'])
+    ProfileName=str(request.json['userid'])+'_@_'+request.json['ProfileName']
+    ProfileArn=get_profile_arn(ProfileName)
+
+    response_p_info= client_a4b.get_profile(
+        ProfileArn=ProfileArn
+        )
+    response = response_p_info['Profile']
+    response['ProfileName'] = response_p_info['Profile']['ProfileName'].split('_@_')[1]    
+    return jsonify(response)
 	
 
 def get_profile_arn(ProfileName):
