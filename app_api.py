@@ -345,7 +345,7 @@ def update_rooms():
     try:
         #client_a4b=create_client()
         #get roomarn from roomname
-        RoomName=request.json['OldRoomName']
+        RoomName=str(request.json['userid'])+'_@_'+str(request.json['OldRoomName'])
         RoomArn=get_room_arn(RoomName)
         
         #get profile arn from profile name
@@ -355,7 +355,7 @@ def update_rooms():
         #call update room only for changing room profile
         response= client_a4b.update_room(
         RoomArn=RoomArn,
-        RoomName=request.json['RoomName'],
+        RoomName=str(request.json['userid'])+'_@_'+str(request.json['RoomName']),
         #Description=request.json['Description'],
         #ProviderCalendarId=request.json['ProviderCalendarId'],
         ProfileArn=ProfileArn)
