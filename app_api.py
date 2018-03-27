@@ -589,16 +589,16 @@ def disassociate_device_from_room(devicename=''):
 
 @app.route("/a4b/api/v1.0/requests_insert",methods=['POST'])
 def requests_insert():
-
+    request_name = str(request.json['userid'])+'_@_'+str(request.json['request_name'].lower())
     #to verify if the request is duplicate
     response=requests_table.query(
-        KeyConditionExpression=Key('request_name').eq(request.json['request_name'].lower())
+        KeyConditionExpression=Key('request_name').eq(request_name)
         )
     request_exist=response['Items']
     if not request_exist:
         #if the request_name not in dynamodb, then create the request
         OtherDetails={}
-        OtherDetails['request_name'] = request.json['request_name'].lower()
+        OtherDetails['request_name'] = request_name
         OtherDetails['Status']=request.json["Status"].lower()
         OtherDetails['RequestType']=request.json["RequestType"]
         OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
@@ -784,15 +784,15 @@ def request_temp_delete():
 @app.route("/a4b/api/v1.0/add_notification_template",methods=['POST'])
 def add_notification_template():
     if 'template_name' in request.json:
-    
-        filter_expression = Key('template_name').eq(request.json['template_name'])
+        TemplateName = str(request.json['userid'])+'_@_'+str(request.json['template_name'])
+        filter_expression = Key('template_name').eq(TemplateName)
         response=Notification_TemplateTable.scan(
             FilterExpression=filter_expression
         )
         if response['Count']>0:
             return jsonify({'error':'Notification Template with the name already exist'})
         else:
-            template_name = request.json['template_name']
+            template_name = TemplateName
             template      = request.json['template']
             username      = request.json['username']
             response=Notification_TemplateTable.put_item(
@@ -809,7 +809,7 @@ def add_notification_template():
 @app.route("/a4b/api/v1.0/get_notification_template",methods=['POST'])
 def get_notification_template():
     if request.json['template_name']:
-        template_name = request.json['template_name']
+        template_name = str(request.json['userid'])+'_@_'+str(request.json['template_name'])
         username = request.json['username']
         filter_expression = Key('template_name').eq(template_name)&Key('username').eq(username)
         response=Notification_TemplateTable.scan(
@@ -829,7 +829,7 @@ def get_notification_template():
 
 @app.route("/a4b/api/v1.0/update_notification_template",methods=['POST'])
 def update_notification_template():   
-    template_name = request.json['old_template_name']
+    template_name = str(request.json['userid'])+'_@_'+str(request.json['old_template_name'])
     response = Notification_TemplateTable.delete_item(
         Key={
             'template_name': template_name
@@ -837,7 +837,7 @@ def update_notification_template():
     )
     #return jsonify(response)
     if 'template_name' in request.json:
-        template_name = request.json['template_name']
+        template_name = str(request.json['userid'])+'_@_'+(request.json['template_name'])
         template      = request.json['template']
         username      = request.json['username']
         response=Notification_TemplateTable.put_item(
@@ -856,7 +856,7 @@ def notification_temp_delete():
 	for Template in Notification_Temp_List:	
 		response = Notification_TemplateTable.delete_item(
             Key={
-                'template_name': Template
+                'template_name': str(request.json['userid'])+'_@_'+str(Template)
             }
         )
 		
