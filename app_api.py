@@ -261,7 +261,7 @@ def delete_room_profile():
     ProfileNameList=request.json['ProfileName']
     for ProfileName in ProfileNameList:
         ProfileArn=get_profile_arn(ProfileName)
-        
+        #print(ProfileArn)
         response = Room_Profile.delete_item(
             Key={
                     'profile_arn': ProfileArn
@@ -280,7 +280,8 @@ def delete_room_profile():
     # response = client_a4b.delete_profile(
         # ProfileArn=ProfileArn
     # )
-    return list_room_profile()
+    #return list_room_profile()
+    return ''
 
 #
 #CRUD for rooms
