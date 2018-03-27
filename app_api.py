@@ -394,7 +394,7 @@ def delete_rooms():
 def get_rooms():	
 	#client_a4b=create_client()
     if 'RoomName' in request.json:
-        RoomName = str(request.json['RoomName'])+'_@_'+str(request.json['RoomName'])
+        RoomName = str(request.json['userid'])+'_@_'+str(request.json['RoomName'])
         response = client_a4b.search_rooms(
         Filters=[
         {
@@ -416,7 +416,6 @@ def get_rooms():
                 'Value': 'ASC'
             },
         ])
-        
     username = request.json['username']
         
     DeviceDict = list_devices_with_rooms()
