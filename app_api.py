@@ -779,6 +779,8 @@ def add_notification_template():
             FilterExpression=filter_expression
         )
         if response['Count']>0:
+            return jsonify({'error':'Notification Template with the name already exist'})
+        else:
             template_name = request.json['template_name']
             template      = request.json['template']
             username      = request.json['username']
@@ -789,8 +791,6 @@ def add_notification_template():
                 'username':username
             })
             return jsonify(response)
-        else:
-            return ({'error':'Notification Template with the name already exist'})
     else:
         return jsonify({'error':'No Notification Templates in the request'})
         
