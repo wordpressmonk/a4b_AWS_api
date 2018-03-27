@@ -775,10 +775,12 @@ def add_notification_template():
     if 'template_name' in request.json:
         template_name = request.json['template_name']
         template      = request.json['template']
+        username      = request.json['username']
         response=Notification_TemplateTable.put_item(
         Item={
             'template_name':template_name,
-            'template':template
+            'template':template,
+            'username':username
         })
         return jsonify(response)
     else:
@@ -789,13 +791,18 @@ def add_notification_template():
 def get_notification_template():
     if request.json['template_name']:
         template_name = request.json['template_name']
-        filter_expression = Key('template_name').eq(template_name)
+        username = request.json['username']
+        filter_expression = Key('template_name').eq(template_name)&Key('username').eq(username)
         response=Notification_TemplateTable.scan(
             FilterExpression=filter_expression
         )
         return jsonify(response)
     else:
-        response=Notification_TemplateTable.scan()
+        username = request.json['username']
+        filter_expression = Key('username').eq(username)
+        response=Notification_TemplateTable.scan(
+            FilterExpression=filter_expression
+        )
         if response:
             return jsonify(response)
         else:
