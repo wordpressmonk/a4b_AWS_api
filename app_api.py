@@ -154,8 +154,9 @@ def add_skill_group():
 def add_room_profile():
     try:
         #user_a4b=create_client()#when login page is provided pass username from login page
+        ProfileName = request.json['userid']+'_@_'+request.json['ProfileName']
         response = client_a4b.create_profile(
-        ProfileName=request.json['ProfileName'],
+        ProfileName=ProfileName,
         Timezone=request.json['Timezone'],
         Address=request.json['Address'],
         DistanceUnit=request.json['DistanceUnit'],
@@ -201,14 +202,15 @@ def list_room_profile():
         if 'Item' in room_profile_response:
             Username_RP =room_profile_response['Item']['username']
             if str(username)==str(Username_RP):
-                ProfileNameList.append(profile['ProfileName'])
+                ProfileName = profile['ProfileName'].split('_@_')[1]
+                ProfileNameList.append(ProfileName)
     return jsonify(ProfileNameList)
 	
 	
 @app.route("/a4b/api/v1.0/get_room_profile_info", methods=['POST'])
 @handle_stripe
 def get_room_profile_info():#ProfileName
-	ProfileName=request.json['ProfileName']
+	ProfileName=request.json['userid']+'_@_'+request.json['ProfileName']
 	ProfileArn=get_profile_arn(ProfileName)
 	
 	response_p_info= client_a4b.get_profile(
@@ -235,12 +237,13 @@ def get_profile_arn(ProfileName):
 @handle_stripe	
 def update_room_profile():
     try:
-        ProfileName=request.json['OldProfileName']
-        ProfileArn=get_profile_arn(ProfileName)
+        OldProfileName= request.json['OldProfileName']
+        ProfileName   = request.json['userid']+'_@_'+request.json['ProfileName']
+        ProfileArn=get_profile_arn(OldProfileName)
         #return jsonify(ProfileArn)
         response = client_a4b.update_profile(
         ProfileArn=ProfileArn,
-        ProfileName=request.json['ProfileName'],
+        ProfileName=ProfileName,
         Timezone=request.json['Timezone'],
         Address=request.json['Address'],
         DistanceUnit=request.json['DistanceUnit'],
@@ -262,7 +265,8 @@ def delete_room_profile():
         ProfileNameList=request.json['ProfileName']
         for ProfileName in ProfileNameList:
             try:
-                ProfileArn=get_profile_arn(ProfileName)
+                Profile_Name = request.json['userid']+'_@_'+ProfileName
+                ProfileArn=get_profile_arn(Profile_Name)
                 #print(ProfileArn)
                 response = Room_Profile.delete_item(
                     Key={
@@ -299,7 +303,7 @@ def add_rooms():
     #user_a4b=create_client()
     #get profile arn from profile name
 	
-    ProfileName=request.json['ProfileName']
+    ProfileName=request.json['userid']+'_@_'+request.json['ProfileName']
     ProfileArn=get_profile_arn(ProfileName)
     try:
         response = client_a4b.create_room(
@@ -343,7 +347,7 @@ def update_rooms():
         RoomArn=get_room_arn(RoomName)
         
         #get profile arn from profile name
-        ProfileName=request.json['ProfileName']
+        ProfileName=request.json['userid']+'_@_'+request.json['ProfileName']
         ProfileArn=get_profile_arn(ProfileName)
         
         #call update room only for changing room profile
@@ -370,6 +374,7 @@ def delete_rooms():
     RoomNameList=request.json['RoomName']
     for RoomName in RoomNameList:
         try:
+            Room_Name = request.json['userid']+'_@_'+RoomName
             RoomArn=get_room_arn(RoomName)
             response = client_a4b.delete_room(
             RoomArn=RoomArn)
@@ -387,7 +392,7 @@ def delete_rooms():
 def get_rooms():	
 	#client_a4b=create_client()
     if 'RoomName' in request.json:
-        RoomName=request.json['RoomName']
+        RoomName=request.json['RoomName'].split('_@_')[1]
         response = client_a4b.search_rooms(
         Filters=[
         {
@@ -426,7 +431,7 @@ def get_rooms():
             Username_R = room_response['Item']['Username']
             if str(username)==str(Username_R):
                 Roomdict={}
-                Roomdict['RoomName']    =room['RoomName']
+                Roomdict['RoomName']    =room['RoomName'].split('_@_')[1]
                 Roomdict['ProfileName'] =room['ProfileName']
                 if room['RoomName'] in DeviceDict.keys():
                     Roomdict['DeviceName'] = DeviceDict[room['RoomName']]
