@@ -154,7 +154,7 @@ def add_skill_group():
 def add_room_profile():
     try:
         #user_a4b=create_client()#when login page is provided pass username from login page
-        ProfileName = str(request.json['userid'])+'_@_'+request.json['ProfileName']
+        ProfileName = str(request.json['userid'])+'_@_'+str(request.json['ProfileName'])
         response = client_a4b.create_profile(
         ProfileName=ProfileName,
         Timezone=request.json['Timezone'],
@@ -210,7 +210,7 @@ def list_room_profile():
 @app.route("/a4b/api/v1.0/get_room_profile_info", methods=['POST'])
 #@handle_stripe
 def get_room_profile_info():#ProfileName
-    ProfileName=str(request.json['userid'])+'_@_'+request.json['ProfileName']
+    ProfileName=str(request.json['userid'])+'_@_'+str(request.json['ProfileName'])
     ProfileArn=get_profile_arn(ProfileName)
 
     response_p_info= client_a4b.get_profile(
@@ -240,7 +240,7 @@ def get_profile_arn(ProfileName):
 def update_room_profile():
     try:
         OldProfileName= request.json['OldProfileName']
-        ProfileName   = str(request.json['userid'])+'_@_'+request.json['ProfileName']
+        ProfileName   = str(request.json['userid'])+'_@_'+str(request.json['ProfileName'])
         ProfileArn=get_profile_arn(OldProfileName)
         #return jsonify(ProfileArn)
         response = client_a4b.update_profile(
@@ -267,7 +267,7 @@ def delete_room_profile():
         ProfileNameList=request.json['ProfileName']
         for ProfileName in ProfileNameList:
             try:
-                Profile_Name = str(request.json['userid'])+'_@_'+ProfileName
+                Profile_Name = str(request.json['userid'])+'_@_'+str(ProfileName)
                 ProfileArn=get_profile_arn(Profile_Name)
                 #print(ProfileArn)
                 response = Room_Profile.delete_item(
@@ -305,11 +305,11 @@ def add_rooms():
     #user_a4b=create_client()
     #get profile arn from profile name
 	
-    ProfileName=str(request.json['userid'])+'_@_'+request.json['ProfileName']
+    ProfileName=str(request.json['userid'])+'_@_'+str(request.json['ProfileName'])
     ProfileArn=get_profile_arn(ProfileName)
     try:
         response = client_a4b.create_room(
-        RoomName=request.json['RoomName'],
+        RoomName=str(request.json['userid'])+'_@_'+str(request.json['RoomName']),
         ProfileArn=ProfileArn)
         response_table=Rooms_By.put_item(
         Item={
@@ -349,7 +349,7 @@ def update_rooms():
         RoomArn=get_room_arn(RoomName)
         
         #get profile arn from profile name
-        ProfileName=str(request.json['userid'])+'_@_'+request.json['ProfileName']
+        ProfileName=str(request.json['userid'])+'_@_'+str(request.json['ProfileName'])
         ProfileArn=get_profile_arn(ProfileName)
         
         #call update room only for changing room profile
@@ -376,7 +376,7 @@ def delete_rooms():
     RoomNameList=request.json['RoomName']
     for RoomName in RoomNameList:
         try:
-            Room_Name = str(request.json['userid'])+'_@_'+RoomName
+            Room_Name = str(request.json['userid'])+'_@_'+str(RoomName)
             RoomArn=get_room_arn(RoomName)
             response = client_a4b.delete_room(
             RoomArn=RoomArn)
