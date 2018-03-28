@@ -731,7 +731,7 @@ def requests_update():
 				)
 			return jsonify(response)
 		else:#to verify if the request is duplicate
-			return("Request with the request name already exists")
+			return jsonify({"error":"Request with the request name already exists"})
 			
 #
 #Skill Parameter
