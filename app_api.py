@@ -239,7 +239,7 @@ def get_profile_arn(ProfileName):
 @handle_stripe	
 def update_room_profile():
     try:
-        OldProfileName= request.json['OldProfileName']
+        OldProfileName= str(request.json['userid'])+'_@_'+str(request.json['OldProfileName'])
         ProfileName   = str(request.json['userid'])+'_@_'+str(request.json['ProfileName'])
         ProfileArn=get_profile_arn(OldProfileName)
         #return jsonify(ProfileArn)
