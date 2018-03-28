@@ -475,7 +475,7 @@ def get_devices():
             DeviceDict['DeviceStatus']=device['DeviceStatus'] if 'DeviceStatus' in device else ''
             DeviceDict['DeviceName']=device['DeviceName'] if 'DeviceName' in device else ''
             if "RoomName" in device.keys(): # condition to check if devices are associated with any rooms
-                DeviceDict['RoomName'] = device['RoomName']	
+                DeviceDict['RoomName'] = device['RoomName'].split('_@_')[1]	
             DeviceList.append(DeviceDict)
         return jsonify(DeviceList)
         # return jsonify(response)
