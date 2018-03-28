@@ -671,7 +671,7 @@ def requests_delete():
 		
 		response = requests_table.delete_item(
         Key={
-            'request_name': request_name
+            'request_name': str(request.json['userid'])+'_@_'+str(request_name)
         }
     )
 		
