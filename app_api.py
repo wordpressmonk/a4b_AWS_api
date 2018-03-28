@@ -599,7 +599,7 @@ def requests_insert():
         #if the request_name not in dynamodb, then create the request
         OtherDetails={}
         OtherDetails['request_name'] = request_name
-        OtherDetails['Status']=request.json["Status"].lower()
+        OtherDetails['RequestStatus']=request.json["Status"].lower()
         OtherDetails['RequestType']=request.json["RequestType"]
         OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
         OtherDetails['Conversation']=str(request.json["Conversation"])
@@ -676,7 +676,63 @@ def requests_delete():
     )
 		
 	return jsonify(response)
+
+@app.route("/a4b/api/v1.0/requests_update",methods=['POST'])
+def requests_update():
+	request_name = str(request.json['userid'])+'_@_'+str(request.json['request_name'].lower())
+	oldrequest_name = str(request.json['userid'])+'_@_'+str(request.json['oldrequest_name'].lower())
+	response=requests_table.query(
+		KeyConditionExpression=Key('request_name').eq(request_name)
+	)
+	request_exist=response['Items']
 	
+	OtherDetails={}
+	OtherDetails['request_name'] = request_name
+	OtherDetails['RequestStatus']=request.json["Status"].lower()
+	OtherDetails['RequestType']=request.json["RequestType"]
+	OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
+	OtherDetails['Conversation']=str(request.json["Conversation"])
+	OtherDetails['username']=str(request.json["username"])
+	
+	if "Check_Email" in request.json and request.json["Check_Email"]== "1":
+		OtherDetails['EmailID']=request.json["EmailID"]
+		
+	if "Check_Text" in request.json and request.json["Check_Text"]== "1":
+		OtherDetails['TextNumber']=request.json["TextNumber"]
+		
+	if "Check_Call" in request.json and request.json["Check_Call"]== "1":
+		OtherDetails['CallNumber']=request.json["CallNumber"]
+		
+	if not request_exist: #create new request
+	
+		response=requests_table.put_item(
+			Item=OtherDetails)
+        
+		return jsonify(response)
+		#return jsonify("Creating new item")
+		
+	else:
+		if(request_name == oldrequest_name): #update request
+			del OtherDetails['request_name']
+			up_ex="Set "
+			ex_attr_values = {}
+			i=0
+			for OD in OtherDetails:
+				up_ex+=OD+" = :val"+str(i)+","
+				ex_attr_values[':val'+str(i)]=OtherDetails[OD]
+				i=i+1
+			up_ex=up_ex[:-1]
+			response = requests_table.update_item(
+				Key={
+					'request_name': request_name
+					},
+				UpdateExpression= up_ex,
+				ExpressionAttributeValues=ex_attr_values
+				)
+			return jsonify(response)
+		else:#to verify if the request is duplicate
+			return("Request with the request name already exists")
+			
 #
 #Skill Parameter
 #
