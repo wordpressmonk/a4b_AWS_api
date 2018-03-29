@@ -603,6 +603,7 @@ def requests_insert():
         OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
         OtherDetails['Conversation']=str(request.json["Conversation"])
         OtherDetails['username']=str(request.json["username"])
+        OtherDetails['userid']=str(request.json["userid"])
         
         if "Check_Email" in request.json and request.json["Check_Email"]== "1":
             OtherDetails['EmailID']=request.json["EmailID"]
@@ -692,6 +693,7 @@ def requests_update():
     OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
     OtherDetails['Conversation']=str(request.json["Conversation"])
     OtherDetails['username']=str(request.json["username"])
+    OtherDetails['userid']=str(request.json["userid"])
 
     if "Check_Email" in request.json and request.json["Check_Email"]== "1":
         OtherDetails['EmailID']=request.json["EmailID"]
