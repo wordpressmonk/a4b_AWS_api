@@ -886,12 +886,6 @@ def get_notification_template():
 
 @app.route("/a4b/api/v1.0/update_notification_template",methods=['POST'])
 def update_notification_template():   
-    template_name = str(request.json['userid'])+'_@_'+str(request.json['old_template_name'])
-    response = Notification_TemplateTable.delete_item(
-        Key={
-            'template_name': template_name
-        }
-    )
     #return jsonify(response)
     if 'template_name' in request.json:
         template_name = str(request.json['userid'])+'_@_'+(request.json['template_name'])
@@ -904,6 +898,12 @@ def update_notification_template():
         if response['Count']>0:
             return jsonify({'error':'Notification Template with the name already exist'})
         else:    
+            old_template_name = str(request.json['userid'])+'_@_'+str(request.json['old_template_name'])
+            response = Notification_TemplateTable.delete_item(
+                Key={
+                    'template_name': old_template_name
+                }
+            )
             response=Notification_TemplateTable.put_item(
             Item={
                 'template_name':template_name,
