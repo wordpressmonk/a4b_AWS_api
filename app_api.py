@@ -897,13 +897,20 @@ def update_notification_template():
         template_name = str(request.json['userid'])+'_@_'+(request.json['template_name'])
         template      = request.json['template']
         username      = request.json['username']
-        response=Notification_TemplateTable.put_item(
-        Item={
-            'template_name':template_name,
-            'template':template,
-            'username':username
-        })
-        return jsonify(response)
+        filter_expression = Key('template_name').eq(TemplateName)
+        response=Notification_TemplateTable.scan(
+            FilterExpression=filter_expression
+        )
+        if response['Count']>0:
+            return jsonify({'error':'Notification Template with the name already exist'})
+        else:    
+            response=Notification_TemplateTable.put_item(
+            Item={
+                'template_name':template_name,
+                'template':template,
+                'username':username
+            })
+            return jsonify(response)
     else:
         return jsonify({'error':'No Notification Templates in the request'})        
 
