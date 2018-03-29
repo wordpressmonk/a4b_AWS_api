@@ -273,7 +273,7 @@ def delete_room_profile():
                     ProfileArn=ProfileArn
                 )
             except Exception as e:
-                return str(e) 
+                return jsonify({"error":str(e)}) 
             else:
                 response = Room_Profile.delete_item(
                     Key={
@@ -281,7 +281,7 @@ def delete_room_profile():
                         }
                 )
     except Exception as e:
-        return str(e) 
+        return jsonify({"error":str(e)}) 
 
         
     # return get_rooms()
