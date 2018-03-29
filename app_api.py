@@ -600,8 +600,10 @@ def requests_insert():
         OtherDetails['request_name'] = request_name.strip()
         OtherDetails['RequestStatus']=request.json["Status"].lower()
         OtherDetails['RequestType']=request.json["RequestType"]
-        OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
-        OtherDetails['Conversation']=str(request.json["Conversation"])
+        if "NotificationTemplate" in request.json:
+            OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
+        if "Conversation" in request.json:
+            OtherDetails['Conversation']=str(request.json["Conversation"])
         OtherDetails['username']=str(request.json["username"])
         OtherDetails['userid']=str(request.json["userid"])
         
