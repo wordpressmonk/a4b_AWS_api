@@ -597,7 +597,7 @@ def requests_insert():
     if not request_exist:
         #if the request_name not in dynamodb, then create the request
         OtherDetails={}
-        OtherDetails['request_name'] = request_name
+        OtherDetails['request_name'] = request_name.strip()
         OtherDetails['RequestStatus']=request.json["Status"].lower()
         OtherDetails['RequestType']=request.json["RequestType"]
         OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
@@ -638,7 +638,7 @@ def request_info():
     request_name = str(request.json['userid'])+'_@_'+str(request.json['request_name'])
     response = requests_table.query(
         KeyConditionExpression=Key('request_name').eq(request_name)
-        )
+        )   
     conversation = 	response['Items'][0]['Conversation']
     del response['Items'][0]['Conversation']
     response['Items'][0]['Conversation'] = eval(conversation)
@@ -687,7 +687,7 @@ def requests_update():
     request_exist=response['Items']
 
     OtherDetails={}
-    OtherDetails['request_name'] = request_name
+    OtherDetails['request_name'] = request_name.strip()
     OtherDetails['RequestStatus']=request.json["Status"].lower()
     OtherDetails['RequestType']=request.json["RequestType"]
     OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
