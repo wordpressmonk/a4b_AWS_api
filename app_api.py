@@ -273,7 +273,7 @@ def delete_room_profile():
                     ProfileArn=ProfileArn
                 )
             except Exception as e:
-                return jsonify({"error":str(e)}) 
+                return jsonify({"error":str(e.split(':')[1])}) 
             else:
                 response = Room_Profile.delete_item(
                     Key={
