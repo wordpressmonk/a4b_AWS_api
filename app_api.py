@@ -923,15 +923,25 @@ def update_notification_template():
 
 @app.route("/a4b/api/v1.0/notification_temp_delete",methods=['POST'])
 def notification_temp_delete():
-	Notification_Temp_List=request.json['Notification_Temp']
-	for Template in Notification_Temp_List:	
-		response = Notification_TemplateTable.delete_item(
-            Key={
-                'template_name': str(request.json['userid'])+'_@_'+str(Template)
-            }
+    Notification_Temp_List=request.json['Notification_Temp']
+    for Template in Notification_Temp_List:	
+        filter_expression = Key('NotificationTemplate').eq(Template.strip())
+        req_response=requests_table.scan(
+            FilterExpression=filter_expression
         )
+        request_exist=req_response['Items']
+        if not request_exist:
+            response = Notification_TemplateTable.delete_item(
+                Key={
+                    'template_name': str(request.json['userid'])+'_@_'+str(Template)
+                }
+            )
+            return jsonify(response)    
+        else:
+            return jsonify({"error":"Cannot delete Template(s) while it is still associated to existing Requests"})
+            
 		
-	return jsonify(response)
+	
     
 if __name__ == "__main__":
 	#app.run(debug=True)
