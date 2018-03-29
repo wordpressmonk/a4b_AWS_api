@@ -266,23 +266,22 @@ def delete_room_profile():
     try:
         ProfileNameList=request.json['ProfileName']
         for ProfileName in ProfileNameList:
+            Profile_Name = str(request.json['userid'])+'_@_'+str(ProfileName)
+            ProfileArn=get_profile_arn(Profile_Name)
             try:
-                Profile_Name = str(request.json['userid'])+'_@_'+str(ProfileName)
-                ProfileArn=get_profile_arn(Profile_Name)
-                #print(ProfileArn)
+                response = client_a4b.delete_profile(
+                    ProfileArn=ProfileArn
+                )
+            except Exception as e:
+                return str(e) 
+            else:
                 response = Room_Profile.delete_item(
                     Key={
                             'profile_arn': ProfileArn
                         }
                 )
-                
-                response = client_a4b.delete_profile(
-                    ProfileArn=ProfileArn
-                )
-            except Exception as e:
-                pass
     except Exception as e:
-        pass 
+        return str(e) 
 
         
     # return get_rooms()
