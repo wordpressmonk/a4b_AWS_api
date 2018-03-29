@@ -704,6 +704,12 @@ def requests_update():
 		OtherDetails['CallNumber']=request.json["CallNumber"]
 		
 	if not request_exist: #create new request
+    
+        response = requests_table.delete_item(
+            Key={
+                'request_name': oldrequest_name
+            }
+        )
 	
 		response=requests_table.put_item(
 			Item=OtherDetails)
