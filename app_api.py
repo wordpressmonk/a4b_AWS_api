@@ -897,7 +897,7 @@ def update_notification_template():
         template_name = str(request.json['userid'])+'_@_'+(request.json['template_name'])
         template      = request.json['template']
         username      = request.json['username']
-        filter_expression = Key('template_name').eq(TemplateName)
+        filter_expression = Key('template_name').eq(template_name)
         response=Notification_TemplateTable.scan(
             FilterExpression=filter_expression
         )
