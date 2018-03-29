@@ -601,20 +601,24 @@ def requests_insert():
         OtherDetails['RequestStatus']=request.json["Status"].lower()
         OtherDetails['RequestType']=request.json["RequestType"]
         if "NotificationTemplate" in request.json:
-            OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
+            if request.json["NotificationTemplate"]:
+                OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
         if "Conversation" in request.json:
             OtherDetails['Conversation']=str(request.json["Conversation"])
         OtherDetails['username']=str(request.json["username"])
         OtherDetails['userid']=str(request.json["userid"])
         
-        if "Check_Email" in request.json and request.json["Check_Email"]== "1":
-            OtherDetails['EmailID']=request.json["EmailID"]
+        if "Check_Email" in request.json:
+            if request.json["Check_Email"]== "1":
+                OtherDetails['EmailID']=request.json["EmailID"]
             
-        if "Check_Text" in request.json and request.json["Check_Text"]== "1":
-            OtherDetails['TextNumber']=request.json["TextNumber"]
+        if "Check_Text" in request.json:
+            if request.json["Check_Text"]== "1":
+                OtherDetails['TextNumber']=request.json["TextNumber"]
             
-        if "Check_Call" in request.json and request.json["Check_Call"]== "1":
-            OtherDetails['CallNumber']=request.json["CallNumber"]
+        if "Check_Call" in request.json:
+            if request.json["Check_Call"]== "1":
+                OtherDetails['CallNumber']=request.json["CallNumber"]
             
         
         #Level=int(request.json["Level"])
@@ -625,9 +629,7 @@ def requests_insert():
             
             # OtherDetails["Q"+str(i+1)]= Q
             # OtherDetails["A"+str(i+1)]= A
-        
-        response=requests_table.put_item(
-        Item=OtherDetails)
+        response=requests_table.put_item(Item=OtherDetails)
         
         #return display_menu()
         return jsonify(response)
