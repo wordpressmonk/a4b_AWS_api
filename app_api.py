@@ -704,12 +704,18 @@ def requests_update():
 
     if "Check_Email" in request.json and request.json["Check_Email"]== "1":
         OtherDetails['EmailID']=request.json["EmailID"]
+    elif "Check_Email" in request.json and request.json["Check_Email"]== "0": 
+        OtherDetails['EmailID']=False    
         
     if "Check_Text" in request.json and request.json["Check_Text"]== "1":
         OtherDetails['TextNumber']=request.json["TextNumber"]
+    elif "Check_Text" in request.json and request.json["Check_Text"]== "0": 
+        OtherDetails['TextNumber']=False
         
     if "Check_Call" in request.json and request.json["Check_Call"]== "1":
         OtherDetails['CallNumber']=request.json["CallNumber"]
+    elif "Check_Call" in request.json and request.json["Check_Call"]== "0": 
+        OtherDetails['CallNumber']=False    
         
     if not request_exist: #create new request
 
