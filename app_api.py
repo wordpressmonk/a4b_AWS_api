@@ -643,10 +643,11 @@ def request_info():
     response = requests_table.query(
         KeyConditionExpression=Key('request_name').eq(request_name)
         )   
-    if 'Conversation' in response['Items'][0]:
-        conversation = 	response['Items'][0]['Conversation']
-        del response['Items'][0]['Conversation']
-        response['Items'][0]['Conversation'] = eval(conversation)
+    if response['Items']:
+        if 'Conversation' in response['Items'][0]:
+            conversation = 	response['Items'][0]['Conversation']
+            del response['Items'][0]['Conversation']
+            response['Items'][0]['Conversation'] = eval(conversation)
     #for value in eval(response['Items'][0]['Conversation']):
     return jsonify(response['Items'])
     #return type(response['Items'])
