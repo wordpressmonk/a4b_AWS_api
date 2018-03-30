@@ -317,7 +317,7 @@ def add_rooms():
         })
         
         #return (response['RoomArn'])
-        if request.json['DeviceName']:
+        if 'DeviceName' in request.json:
             return associate_device_room(response['RoomArn'],request.json['DeviceName'])
     except Exception as e:
         return jsonify({'error':str(e)})
@@ -912,19 +912,27 @@ def update_notification_template():
         )
         if response['Count']>0 and template_name!=old_template_name:
             return jsonify({'error':'Notification Template with the name already exist'})
-        else:    
-            response = Notification_TemplateTable.delete_item(
-                Key={
-                    'template_name': old_template_name
-                }
+        else:
+            filter_expression = Key('NotificationTemplate').eq(request.json['template_name'])
+            Req_response=requests_table.scan(
+                FilterExpression=filter_expression
             )
-            response=Notification_TemplateTable.put_item(
-            Item={
-                'template_name':template_name,
-                'template':template,
-                'username':username
-            })
-            return jsonify(response)
+            request_exist=req_response['Items']
+            if not request_exist:
+                response = Notification_TemplateTable.delete_item(
+                    Key={
+                        'template_name': old_template_name
+                    }
+                )
+                response=Notification_TemplateTable.put_item(
+                Item={
+                    'template_name':template_name,
+                    'template':template,
+                    'username':username
+                })
+                return jsonify(response)
+            else:
+                jsonify({'error':'This Template already associated with Request(s)'}) 
     else:
         return jsonify({'error':'No Notification Templates in the request'})        
 
