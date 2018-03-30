@@ -695,7 +695,8 @@ def requests_update():
     OtherDetails['request_name'] = request_name.strip()
     OtherDetails['RequestStatus']=request.json["Status"].lower()
     OtherDetails['RequestType']=request.json["RequestType"]
-    OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
+    if request.json["NotificationTemplate"] !="":
+        OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
     OtherDetails['Conversation']=str(request.json["Conversation"])
     OtherDetails['username']=str(request.json["username"])
     OtherDetails['userid']=str(request.json["userid"])
