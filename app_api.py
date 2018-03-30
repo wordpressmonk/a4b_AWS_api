@@ -913,7 +913,7 @@ def update_notification_template():
         if response['Count']>0 and template_name!=old_template_name:
             return jsonify({'error':'Notification Template with the name already exist'})
         else:
-            filter_expression = Key('NotificationTemplate').eq(request.json['template_name'])
+            filter_expression = Key('NotificationTemplate').eq(request.json['old_template_name'])
             Req_response=requests_table.scan(
                 FilterExpression=filter_expression
             )
@@ -932,7 +932,7 @@ def update_notification_template():
                 })
                 return jsonify(response)
             else:
-                jsonify({'error':'This Template already associated with Request(s)'}) 
+                jsonify({'error':'Cannot Update Template Name while it is still associated to existing Request(s)'}) 
     else:
         return jsonify({'error':'No Notification Templates in the request'})        
 
