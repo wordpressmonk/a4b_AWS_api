@@ -798,7 +798,14 @@ def scan_response():
         
         return jsonify(result)
     else:
-        response=ResponseTable.scan()
+        response=ResponseTable.scan(
+        SortCriteria=[
+            {
+                'Key': 'Date',
+                'Value': 'DESC'
+            },
+        ],
+        )
         return jsonify(response)
         
 @app.route("/a4b/api/v1.0/add_request_types",methods=['POST'])
