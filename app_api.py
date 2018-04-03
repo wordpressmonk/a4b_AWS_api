@@ -790,10 +790,16 @@ def scan_response():
         for k,row in enumerate(response['Items']):
             date =  row['Date']
             olddate = date.split(",")
-            if olddate[0] >= startdate and olddate[0] <= enddate:
-                count+=1
+            
+            if startdate and enddate=="":
+                if startdate == olddate[0]:
+                    count+=1
+                    result['Items'].append(row)
+            elif startdate and enddate:
+                if olddate[0] >= startdate and olddate[0] <= enddate:
+                    count+=1
+                    result['Items'].append(row)
                 
-                result['Items'].append(row)
         result['Count']=count
         
         return jsonify(result)
