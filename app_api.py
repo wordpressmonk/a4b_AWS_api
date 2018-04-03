@@ -598,46 +598,45 @@ def requests_insert():
     request_exist=response['Items']
     if not request_exist:
         #if the request_name not in dynamodb, then create the request
-        if 'VerifiedEmailAddresses' in verified_email:
-            if verified_email['VerifiedEmailAddresses']:
-                OtherDetails={}
-                OtherDetails['request_name'] = request_name.strip()
-                OtherDetails['RequestStatus']=request.json["Status"].lower()
-                OtherDetails['RequestType']=request.json["RequestType"]
-                if "NotificationTemplate" in request.json:
-                    if request.json["NotificationTemplate"]:
-                        OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
-                if "Conversation" in request.json:
-                    OtherDetails['Conversation']=str(request.json["Conversation"])
-                OtherDetails['username']=str(request.json["username"])
-                OtherDetails['userid']=str(request.json["userid"])
+        OtherDetails={}
+        OtherDetails['request_name'] = request_name.strip()
+        OtherDetails['RequestStatus']=request.json["Status"].lower()
+        OtherDetails['RequestType']=request.json["RequestType"]
+        if "NotificationTemplate" in request.json:
+            if request.json["NotificationTemplate"]:
+                OtherDetails['NotificationTemplate']=request.json["NotificationTemplate"]
+        if "Conversation" in request.json:
+            OtherDetails['Conversation']=str(request.json["Conversation"])
+        OtherDetails['username']=str(request.json["username"])
+        OtherDetails['userid']=str(request.json["userid"])
+        
+        if "Check_Email" in request.json:
+            if request.json["Check_Email"]== "1":
+                OtherDetails['EmailID']=request.json["EmailID"]
                 
-                if "Check_Email" in request.json:
-                    if request.json["Check_Email"]== "1":
-                        OtherDetails['EmailID']=request.json["EmailID"]
+                if 'VerifiedEmailAddresses' in verified_email:
+                    if verified_email['VerifiedEmailAddresses']:
                         if not OtherDetails['EmailID'] in verified_email['VerifiedEmailAddresses']:
                             return jsonify({"error":"Your E-mail address is not verified with Alexa For Business."})
-                    
-                if "Check_Text" in request.json:
-                    if request.json["Check_Text"]== "1":
-                        OtherDetails['TextNumber']=request.json["TextNumber"]
-                    
-                if "Check_Call" in request.json:
-                    if request.json["Check_Call"]== "1":
-                        OtherDetails['CallNumber']=request.json["CallNumber"]
-                    
-                
-                #Level=int(request.json["Level"])
-                # OtherDetails['Level']=request.json["Level"]
-                # for i in range(Level):
-                    # Q = request.json["Q"+str(i+1)]
-                    # A = request.json["A"+str(i+1)]
-                    
-                    # OtherDetails["Q"+str(i+1)]= Q
-                    # OtherDetails["A"+str(i+1)]= A
-                response=requests_table.put_item(Item=OtherDetails)
-            else:
-                return jsonify({"error":"Your E-mail address is not verified with Alexa For Business."})
+            
+        if "Check_Text" in request.json:
+            if request.json["Check_Text"]== "1":
+                OtherDetails['TextNumber']=request.json["TextNumber"]
+            
+        if "Check_Call" in request.json:
+            if request.json["Check_Call"]== "1":
+                OtherDetails['CallNumber']=request.json["CallNumber"]
+            
+        
+        #Level=int(request.json["Level"])
+        # OtherDetails['Level']=request.json["Level"]
+        # for i in range(Level):
+            # Q = request.json["Q"+str(i+1)]
+            # A = request.json["A"+str(i+1)]
+            
+            # OtherDetails["Q"+str(i+1)]= Q
+            # OtherDetails["A"+str(i+1)]= A
+        response=requests_table.put_item(Item=OtherDetails)
         
         #return display_menu()
         return jsonify(response)
@@ -693,6 +692,7 @@ def requests_delete():
 
 @app.route("/a4b/api/v1.0/requests_update",methods=['POST'])
 def requests_update():
+    verified_email = json.loads(list_verified_emails())
     request_name = str(request.json['userid'])+'_@_'+str(request.json['request_name'].lower())
     oldrequest_name = str(request.json['userid'])+'_@_'+str(request.json['oldrequest_name'].lower())
     response=requests_table.query(
@@ -712,6 +712,10 @@ def requests_update():
 
     if "Check_Email" in request.json and request.json["Check_Email"]== "1":
         OtherDetails['EmailID']=request.json["EmailID"]
+        if 'VerifiedEmailAddresses' in verified_email:
+            if verified_email['VerifiedEmailAddresses']:
+                if not OtherDetails['EmailID'] in verified_email['VerifiedEmailAddresses']:
+                    return jsonify({"error":"Your E-mail address is not verified with Alexa For Business."})
     elif "Check_Email" in request.json and request.json["Check_Email"]== "0": 
         OtherDetails['EmailID']=False    
         
