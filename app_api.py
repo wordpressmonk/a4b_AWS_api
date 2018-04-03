@@ -801,6 +801,21 @@ def scan_response():
         response=ResponseTable.scan()
         return jsonify(response)
         
+@app.route("/a4b/api/v1.0/delete_response",methods=['POST'])
+def delete_response(): 
+    try:
+        if 'responses' in request.json:
+            responses = request.json['responses']
+            for res_id in responses:            
+                response = ResponseTable.delete_item(
+                    Key={
+                        'ResponseID': res_id
+                    }
+                )
+        return ''    
+    except Exception as e:
+        return str(e)
+    
 @app.route("/a4b/api/v1.0/add_request_types",methods=['POST'])
 def add_request_template():
     if 'request_type' in request.json:
