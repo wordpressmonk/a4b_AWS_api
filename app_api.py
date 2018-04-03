@@ -809,7 +809,7 @@ def delete_response():
             for res_id in responses:            
                 response = ResponseTable.delete_item(
                     Key={
-                        'ResponseID': res_id
+                        'ResponseID': int(res_id)
                     }
                 )
         return ''    
