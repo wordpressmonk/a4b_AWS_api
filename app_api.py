@@ -9,6 +9,7 @@ import time
 client_iam = boto3.client('iam',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
 client_a4b = boto3.client('alexaforbusiness',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
 client_dynamodb = boto3.resource('dynamodb',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
+client_ses = boto3.client('ses',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,region_name=region_name)
 
 table=client_dynamodb.Table('IamUser')
 requests_table=client_dynamodb.Table('Requests')
@@ -983,9 +984,31 @@ def notification_temp_delete():
         else:
             error["error"]="Cannot delete Template(s) while it is still associated to existing Requests"
     return jsonify(error)
-            
-		
+
+#
+#-----------------------SES--------------------------------------
+#
+
+@app.route("/a4b/api/v1.0/add_verify_email",methods=['POST'])
+def add_verify_email():
+	resp_add_verify_email = client_ses.verify_email_identity(
+								EmailAddress=str(request.json['EmailID'])
+							)
+	return jsonify(resp_add_verify_email)
+
+@app.route("/a4b/api/v1.0/delete_verify_email",methods=['POST'])
+def delete_verify_email():
+	resp_delete_verify_email = client_ses.delete_verified_email_address(
+								EmailAddress=request.json['EmailID']
+							)
+	return jsonify(resp_delete_verify_email)
+
+#@app.route("/a4b/api/v1.0/list_verified_emails",methods=['GET'])
+def list_verified_emails():
+	resp_list_verified_emails = client_ses.list_verified_email_addresses()
+	return jsonify(resp_list_verified_emails)
 	
+#------------------------End SES-------------------------------
     
 if __name__ == "__main__":
 	#app.run(debug=True)
