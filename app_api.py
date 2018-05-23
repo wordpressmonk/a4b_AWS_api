@@ -321,7 +321,7 @@ def add_rooms():
             })
             
             #return (response['RoomArn'])
-            if 'DeviceName' in request.json:
+            if 'DeviceName' in request.json and 'RoomArn' in response:
                 return associate_device_room(response['RoomArn'],request.json['DeviceName'])
         except Exception as e:
             return jsonify({'error':str(e)})
