@@ -304,24 +304,27 @@ def delete_room_profile():
 def add_rooms():
     #user_a4b=create_client()
     #get profile arn from profile name
-	
-    ProfileName=str(request.json['userid'])+'_@_'+str(request.json['ProfileName'])
-    ProfileArn=get_profile_arn(ProfileName)
     try:
-        response = client_a4b.create_room(
-        RoomName=str(request.json['userid'])+'_@_'+str(request.json['RoomName']),
-        ProfileArn=ProfileArn)
-        response_table=Rooms_By.put_item(
-        Item={
-            'room_arn':response['RoomArn'],
-            'Username':request.json['username']
-        })
-        
-        #return (response['RoomArn'])
-        if 'DeviceName' in request.json:
-            return associate_device_room(response['RoomArn'],request.json['DeviceName'])
+        ProfileName=str(request.json['userid'])+'_@_'+str(request.json['ProfileName'])
+        ProfileArn=get_profile_arn(ProfileName)
     except Exception as e:
-        return jsonify({'error':str(e)})
+        return jsonify({'error':str(e)})    
+    else:    
+        try:
+            response = client_a4b.create_room(
+            RoomName=str(request.json['userid'])+'_@_'+str(request.json['RoomName']),
+            ProfileArn=ProfileArn)
+            response_table=Rooms_By.put_item(
+            Item={
+                'room_arn':response['RoomArn'],
+                'Username':request.json['username']
+            })
+            
+            #return (response['RoomArn'])
+            if 'DeviceName' in request.json:
+                return associate_device_room(response['RoomArn'],request.json['DeviceName'])
+        except Exception as e:
+            return jsonify({'error':str(e)})
 
 	
 @app.route("/a4b/api/v1.0/get_room_arn",methods=['POST'])
