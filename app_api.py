@@ -392,7 +392,7 @@ def delete_rooms():
         except Exception as e:  
             return str(e)
     #return get_rooms()
-    return ''
+    return jsonify({'delete':str("Deleted successfully")})
 	
 	
 @app.route("/a4b/api/v1.0/get_rooms",methods=['POST'])
