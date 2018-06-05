@@ -617,12 +617,12 @@ def requests_insert():
         if "Check_Email" in request.json:
             if request.json["Check_Email"]== "1":
                 OtherDetails['EmailID']=request.json["EmailID"]
-                
+                Email_Ids = OtherDetails['EmailID'].split(",")
                 if 'VerifiedEmailAddresses' in verified_email:
                     if verified_email['VerifiedEmailAddresses']:
-                        if not OtherDetails['EmailID'] in verified_email['VerifiedEmailAddresses']:
-                            #return jsonify({"error":"Your E-mail address is not verified with Alexa For Business."})
-                            resp_add_verify_email = client_ses.verify_email_identity(EmailAddress=str(request.json['EmailID']))
+                        for e_mail in Email_Ids:
+                            if not e_mail in verified_email['VerifiedEmailAddresses']:
+                                resp_add_verify_email = client_ses.verify_email_identity(EmailAddress=str(e_mail))
             
         if "Check_Text" in request.json:
             if request.json["Check_Text"]== "1":
@@ -716,14 +716,13 @@ def requests_update():
     OtherDetails['userid']=str(request.json["userid"])
 
     if "Check_Email" in request.json and request.json["Check_Email"]== "1":
-        OtherDetails['EmailID']=request.json["EmailID"]
+        Email_Ids = OtherDetails['EmailID'].split(",")
         if 'VerifiedEmailAddresses' in verified_email:
             if verified_email['VerifiedEmailAddresses']:
-                if not OtherDetails['EmailID'] in verified_email['VerifiedEmailAddresses']:
-                    return jsonify({"error":"Your E-mail address is not verified with Alexa For Business."})
-					# resp_add_verify_email = client_ses.verify_email_identity(
-								# EmailAddress=str(request.json['EmailID'])
-							# )
+                for e_mail in Email_Ids:
+                    if not e_mail in verified_email['VerifiedEmailAddresses']:
+                        resp_add_verify_email = client_ses.verify_email_identity(EmailAddress=str(e_mail))
+							
     elif "Check_Email" in request.json and request.json["Check_Email"]== "0": 
         OtherDetails['EmailID']=False    
         
