@@ -622,7 +622,7 @@ def requests_insert():
                     if verified_email['VerifiedEmailAddresses']:
                         if not OtherDetails['EmailID'] in verified_email['VerifiedEmailAddresses']:
                             #return jsonify({"error":"Your E-mail address is not verified with Alexa For Business."})
-							 resp_add_verify_email = client_ses.verify_email_identity(EmailAddress=str(request.json['EmailID']))
+                            resp_add_verify_email = client_ses.verify_email_identity(EmailAddress=str(request.json['EmailID']))
             
         if "Check_Text" in request.json:
             if request.json["Check_Text"]== "1":
