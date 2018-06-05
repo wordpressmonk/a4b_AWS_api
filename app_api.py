@@ -716,6 +716,7 @@ def requests_update():
     OtherDetails['userid']=str(request.json["userid"])
 
     if "Check_Email" in request.json and request.json["Check_Email"]== "1":
+        OtherDetails['EmailID']=request.json["EmailID"]
         Email_Ids = OtherDetails['EmailID'].split(",")
         if 'VerifiedEmailAddresses' in verified_email:
             if verified_email['VerifiedEmailAddresses']:
