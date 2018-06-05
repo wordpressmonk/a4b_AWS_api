@@ -855,8 +855,7 @@ def add_request_template():
         return jsonify(response)
     else:
         return jsonify({'error':'No Request Type in the request'})
-        
-        
+         
 @app.route("/a4b/api/v1.0/get_request_types",methods=['POST'])
 def get_request_template():
     if request.json['request_type']:
