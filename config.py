@@ -9,6 +9,6 @@
 # region_name="us-east-1"
 
 
-aws_access_key_id = "AKIAIBCSS56M36P6AXEQ"#You get access key and secret key from AWS console
-aws_secret_access_key = "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"
+aws_access_key_id = "AKIAIWYWZOEILHR6MIPA"#You get access key and secret key from AWS console
+aws_secret_access_key = "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"
 region_name="us-east-1"
